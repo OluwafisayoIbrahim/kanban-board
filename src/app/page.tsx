@@ -1,8 +1,12 @@
+import Header from '@/components/Header'
+import React from 'react'
+
 const Page = () => {
-  return ( <div>
-    <p className="text-center">WhatsApp</p>
-    
-  </div> );
+  return (
+    <div>
+      <Header />
+    </div>
+  )
 }
- 
-export default Page;
+
+export default Page
