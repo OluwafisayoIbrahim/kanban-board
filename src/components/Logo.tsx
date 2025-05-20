@@ -7,8 +7,8 @@ type LogoProps = {
 const SvgIcon: React.FC<LogoProps> = ({className}) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
-    width="375"
-    height="148"
+    width="300"
+    height="130"
     fill="none"
     viewBox="0 0 375 148"
     className={className}
