@@ -26,21 +26,21 @@ const Header: FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   return (
-    <nav className="max-w-[375px] h-[72px] bg-[#000000] mt-3 lg:max-w-[1380px] md:h-auto lg:h-[150px] md:max-w-[1000px] mx-2 rounded-[15px] xl:max-w-full">
+    <nav className="max-w-full h-[72px] bg-[#000000] mt-[10px] lg:mt-[15px] lg:max-w-[1410px] md:h-auto lg:h-[171px] md:max-w-[1000px] mx-[10px] lg:mx-[15px] rounded-[15px] xl:max-w-full">
       {/* inner flex container */}
-      <div className="max-w-[355px] h-[72px] lg:max-w-[1380px] xl:max-w-full mx-auto flex items-center justify-between lg:h-full px-4">
+      <div className="max-w-full h-[72px] lg:max-w-[1410px] xl:max-w-full flex items-center justify-between lg:h-full">
         {/* Logo */}
         <div className="flex-shrink-0">
           <div className="hidden lg:block">
-            <Logo />
+            <Logo className="my-[11.5px] ml-[15px]"/>
           </div>
           <div className="lg:hidden">
-            <LogoMobile />
+            <LogoMobile className="ml-[12px] my-4"/>
           </div>
         </div>
 
         {/* Desktop nav links */}
-        <div className="hidden lg:flex space-x-12">
+        <div className="hidden lg:flex space-x-[49px] my-[50.5px]">
           <Link
             href="/"
             className="text-white text-lg font-normal hover:text-gray-400 transition-colors"
@@ -62,7 +62,7 @@ const Header: FC = () => {
         </div>
 
         {/* Sign In / Sign Up buttons */}
-        <div className="hidden md:flex items-center space-x-4">
+        <div className="hidden md:flex items-center space-x-[39px] mr-[15px] my-[40.5px]">
           <Button
             variant="outline"
             className="cursor-pointer text-white border border-[#FFFFFF] bg-[#000000] hover:bg-gray-800 hover:text-white w-30 h-[50px] rounded-[6px] text-[16px] font-normal"
@@ -74,11 +74,11 @@ const Header: FC = () => {
           </Button>
         </div>
 
-        <div className="lg:hidden">
+        <div className="lg:hidden w-6 h-auto mr-[26px] my-6">
           <DropdownMenu open={isMenuOpen} onOpenChange={setIsMenuOpen}>
             <DropdownMenuTrigger asChild>
               <button
-                className="text-white p-2 transition-transform duration-200 hover:scale-110"
+                className="text-white active:outline-none transition-transform duration-200 hover:scale-110 p-0 w-6 h-6"
                 aria-label={isMenuOpen ? "Close menu" : "Open menu"}
               >
                 {isMenuOpen ? (
@@ -127,7 +127,7 @@ const Header: FC = () => {
                 </DropdownMenuItem>
               </DropdownMenuGroup>
 
-              <DropdownMenuSeparator className="my-4 border-gray-700" />
+              <DropdownMenuSeparator className="my-4 bg-gray-700" />
 
               <div className="flex flex-col space-y-2">
                 <Button

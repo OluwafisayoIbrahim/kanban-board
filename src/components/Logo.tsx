@@ -1,6 +1,6 @@
 import * as React from "react";
 
-type LogoProps = {
+type LogoProps = React.SVGProps<SVGElement> & {
   className?: string;
 };
 
