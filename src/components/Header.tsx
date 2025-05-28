@@ -32,10 +32,10 @@ const Header: FC = () => {
         {/* Logo */}
         <div className="flex-shrink-0">
           <div className="hidden lg:block">
-            <Logo className="my-[11.5px] ml-[15px]"/>
+            <Logo className="my-[11.5px] ml-[15px]" />
           </div>
           <div className="lg:hidden">
-            <LogoMobile className="ml-[12px] my-4"/>
+            <LogoMobile className="ml-[12px] my-4" />
           </div>
         </div>
 
@@ -63,15 +63,19 @@ const Header: FC = () => {
 
         {/* Sign In / Sign Up buttons */}
         <div className="hidden md:flex items-center space-x-[39px] mr-[15px] my-[40.5px]">
-          <Button
-            variant="outline"
-            className="cursor-pointer text-white border border-[#FFFFFF] bg-[#000000] hover:bg-gray-800 hover:text-white w-30 h-[50px] rounded-[6px] text-[16px] font-normal"
-          >
-            Sign In
-          </Button>
-          <Button className="cursor-pointer bg-white text-black hover:bg-gray-200 w-30 h-[50px] rounded-[6px] text-[16px] font-normal">
-            Sign Up
-          </Button>
+          <Link href="/signin">
+            <Button
+              variant="outline"
+              className="cursor-pointer text-white border border-[#FFFFFF] bg-[#000000] hover:bg-gray-800 hover:text-white w-30 h-[50px] rounded-[6px] text-[16px] font-normal"
+            >
+              Sign In
+            </Button>
+          </Link>
+          <Link href="/signup">
+            <Button className="cursor-pointer bg-white text-black hover:bg-gray-200 w-30 h-[50px] rounded-[6px] text-[16px] font-normal">
+              Sign Up
+            </Button>
+          </Link>
         </div>
 
         <div className="lg:hidden w-6 h-auto mr-[26px] my-6">

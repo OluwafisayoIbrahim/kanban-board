@@ -1,0 +1,16 @@
+@keyframes scrollBackground {
+  0%   { background-position: center 0%; }
+  100% { background-position: center 100%; }
+}
+
+.auth-bg {
+  background-image:
+    linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)),
+    url('/images/task.png');
+
+  background-repeat: repeat-y;
+  background-attachment: fixed;
+  background-size: cover;
+  animation: scrollBackground 60s linear infinite;
+  min-height: 100vh;
+}
