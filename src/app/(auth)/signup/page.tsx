@@ -11,7 +11,7 @@ const SignUpContent = () => {
 const SignUp = () => {
   return (
     <Suspense>
-      <AuthForm type="signup" />
+      <SignUpContent />
     </Suspense>
   );
 };

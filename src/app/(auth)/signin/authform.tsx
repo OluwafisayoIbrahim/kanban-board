@@ -10,11 +10,13 @@ import {
 } from "@/components/ui/form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import React from "react";
+import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { setAuthToken, signIn, SignInData, signUp, SignUpData } from "@/lib/auth";
 
 type AuthType = "signin" | "signup";
 
@@ -74,7 +76,12 @@ const SignInSchema = baseAuthSchema;
 type SignUpFormSchema = z.infer<typeof SignUpSchema>;
 type SignInFormSchema = z.infer<typeof SignInSchema>;
 
-const AuthForm: React.FC<AuthFormProps> = ({ type, onSubmit }) => {
+const AuthForm: React.FC<AuthFormProps> = ({ type = "signin", onSubmit }) => {
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
+
+
   const currentSchema = type === "signup" ? SignUpSchema : SignInSchema;
   const form = useForm<SignUpFormSchema | SignInFormSchema>({
     resolver: zodResolver(currentSchema),
@@ -85,17 +92,35 @@ const AuthForm: React.FC<AuthFormProps> = ({ type, onSubmit }) => {
     },
   });
 
-  const onSubmitHandler = (values: SignUpFormSchema | SignInFormSchema) => {
-    onSubmit && onSubmit(values);
-    console.log(values);
-    if (type === "signup") {
-      const signUpValues = values as SignUpFormSchema;
-      alert(
-        `Username: ${signUpValues.username}, Email: ${signUpValues.email}, Password: ${signUpValues.password}`
-      );
-    } else {
-      const signInValues = values as SignInFormSchema;
-      alert(`Email: ${signInValues.email}, Password: ${signInValues.password}`);
+  const handleRedirect = () => {
+    router.push("/dashboard");
+  }
+
+  const onSubmitHandler = async (values: SignUpFormSchema | SignInFormSchema) => {
+    setIsLoading(true);
+    setError(null);
+
+    try{
+      if (onSubmit) {
+        onSubmit(values);
+        return;
+      }
+
+      if (type === "signup"){
+        const signUpData = values as SignUpData;
+        const response = await signUp(signUpData);
+        setAuthToken(response.access_token);
+        handleRedirect();
+      } else {
+        const signInData = values as SignInData;
+        const response = await signIn(signInData);
+        setAuthToken(response.access_token);
+        handleRedirect();
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "An unexpected error occurred");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -112,6 +137,12 @@ const AuthForm: React.FC<AuthFormProps> = ({ type, onSubmit }) => {
               ? "Welcome back to FlowSpace!"
               : "Welcome to FlowSpace!"}
           </h1>
+          {error && (
+            <div className="flex justify-center items-center">
+              <p className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mt-4">{error}</p>
+            </div>
+          )}
+
           <Form {...form}>
             <form
               onSubmit={form.handleSubmit(onSubmitHandler)}
@@ -185,7 +216,7 @@ const AuthForm: React.FC<AuthFormProps> = ({ type, onSubmit }) => {
                   type="submit"
                   className="font-normal text-[16px] leading-6 w-[106px] h-[56px] cursor-pointer"
                 >
-                  {type === "signin" ? "Log In" : "Sign Up"}
+                  {isLoading ? "Loading..." : type === "signin" ? "Sign In" : "Sign Up"}
                 </Button>
               </div>
             </form>
