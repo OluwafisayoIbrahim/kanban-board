@@ -16,7 +16,14 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { setAuthToken, signIn, SignInData, signUp, SignUpData } from "@/lib/auth";
+import {
+  setAuthToken,
+  signIn,
+  SignInData,
+  signUp,
+  SignUpData,
+} from "@/lib/auth";
+import { useAuthStore } from "@/store/auth-store";
 
 type AuthType = "signin" | "signup";
 
@@ -24,34 +31,20 @@ interface AuthFormProps {
   type?: AuthType;
   onSubmit?: (
     formData:
-      | {
-          email: string;
-          password: string;
-        }
-      | {
-          username: string;
-          email: string;
-          password: string;
-        }
+      | { email: string; password: string }
+      | { username: string; email: string; password: string }
   ) => void;
 }
 
 const baseAuthSchema = z
   .object({
-    email: z.string().email({
-      message: "Please enter a valid email address",
-    }),
+    email: z.string().email({ message: "Please enter a valid email address" }),
     password: z
       .string()
-      .min(6, {
-        message: "Password must be at least 6 characters",
-      })
-      .refine(
-        (password) => /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password),
-        {
-          message: "Password must contain at least one special character",
-        }
-      ),
+      .min(6, { message: "Password must be at least 6 characters" })
+      .refine((pw) => /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(pw), {
+        message: "Password must contain at least one special character",
+      }),
   })
   .required();
 
@@ -59,12 +52,8 @@ const SignUpSchema = baseAuthSchema
   .extend({
     username: z
       .string()
-      .min(3, {
-        message: "Username must be at least 3 characters",
-      })
-      .max(20, {
-        message: "Username must be at most 20 characters",
-      }),
+      .min(3, { message: "Username must be at least 3 characters" })
+      .max(20, { message: "Username must be at most 20 characters" }),
   })
   .refine((data) => data.username !== data.password, {
     message: "Username and password must not match.",
@@ -77,48 +66,53 @@ type SignUpFormSchema = z.infer<typeof SignUpSchema>;
 type SignInFormSchema = z.infer<typeof SignInSchema>;
 
 const AuthForm: React.FC<AuthFormProps> = ({ type = "signin", onSubmit }) => {
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
 
+  const setToken = useAuthStore((s) => s.setToken);
+  const setUser = useAuthStore((s) => s.setUser);
 
   const currentSchema = type === "signup" ? SignUpSchema : SignInSchema;
   const form = useForm<SignUpFormSchema | SignInFormSchema>({
     resolver: zodResolver(currentSchema),
-    defaultValues: {
-      username: "",
-      email: "",
-      password: "",
-    },
+    defaultValues: { username: "", email: "", password: "" },
   });
 
   const handleRedirect = () => {
     router.push("/dashboard");
-  }
+  };
 
-  const onSubmitHandler = async (values: SignUpFormSchema | SignInFormSchema) => {
+  const onSubmitHandler = async (
+    values: SignUpFormSchema | SignInFormSchema
+  ) => {
     setIsLoading(true);
     setError(null);
 
-    try{
+    try {
       if (onSubmit) {
         onSubmit(values);
         return;
       }
 
-      if (type === "signup"){
-        const signUpData = values as SignUpData;
-        const response = await signUp(signUpData);
+      if (type === "signup") {
+        const payload = values as SignUpData;
+        const response = await signUp(payload);
         setAuthToken(response.access_token);
+        setToken(response.access_token);
+        setUser(response.user);
         handleRedirect();
       } else {
-        const signInData = values as SignInData;
-        const response = await signIn(signInData);
+        const payload = values as SignInData;
+        const response = await signIn(payload);
+
         setAuthToken(response.access_token);
+        setToken(response.access_token);
+        setUser(response.user);
         handleRedirect();
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "An unexpected error occurred");
+      setError(err instanceof Error ? err.message : "An unexpected error");
     } finally {
       setIsLoading(false);
     }
