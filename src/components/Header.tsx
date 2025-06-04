@@ -134,17 +134,21 @@ const Header: FC = () => {
               <DropdownMenuSeparator className="my-4 bg-gray-700" />
 
               <div className="flex flex-col space-y-2">
-                <Button
-                  variant="outline"
-                  className="w-full border-[#FFFFFF] text-white hover:bg-gray-800 hover:text-white transition-colors bg-[#000000] rounded-[6px] text-[16px] font-normal"
-                >
-                  <LogIn className="mr-2 h-4 w-4" />
-                  Sign In
-                </Button>
-                <Button className="w-full bg-white text-black hover:bg-gray-200 transition-colors rounded-[6px] text-[16px] font-normal">
-                  <UserPlus className="mr-2 h-4 w-4" />
-                  Sign Up
-                </Button>
+                <Link href="/signin">
+                  <Button
+                    variant="outline"
+                    className="w-full border-[#FFFFFF] text-white hover:bg-gray-800 hover:text-white transition-colors bg-[#000000] rounded-[6px] text-[16px] font-normal"
+                  >
+                    <LogIn className="mr-2 h-4 w-4" />
+                    Sign In
+                  </Button>
+                </Link>
+                <Link href="/signup">
+                  <Button className="w-full bg-white text-black hover:bg-gray-200 transition-colors rounded-[6px] text-[16px] font-normal">
+                    <UserPlus className="mr-2 h-4 w-4" />
+                    Sign Up
+                  </Button>
+                </Link>
               </div>
             </DropdownMenuContent>
           </DropdownMenu>

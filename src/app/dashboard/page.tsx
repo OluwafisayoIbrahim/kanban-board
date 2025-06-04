@@ -21,7 +21,6 @@ interface ApiErrorResponse {
 
 type ApiResponse = ApiSuccessResponse | ApiErrorResponse;
 
-// Type for the welcome messages array
 const WELCOME_MESSAGES: readonly string[] = [
   "Welcome back, {username}! 🎉",
   "Hello {username}! Ready to be productive? 💪",

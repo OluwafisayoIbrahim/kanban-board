@@ -1,5 +1,7 @@
 import React from "react";
 import { Button } from "./ui/button";
+import { Zap } from "lucide-react";
+import Link from "next/link";
 
 const HeroSection = () => {
   return (
@@ -15,12 +17,15 @@ const HeroSection = () => {
         more done.
       </p>
       <div className="flex justify-center items-center mt-[30px] mb-[30px]">
+        <Link href="/signin">
         <Button
           variant="outline"
           className="cursor-pointer text-lg text-[#000000] lg:text-2xl text-center rounded-[8px] lg:w-auto lg:h-[64px] h-[56px] font-normal gap-[17px] lg:gap-6"
         >
          Get Started
         </Button>
+        </Link>
+        
       </div>
     </div>
   );
