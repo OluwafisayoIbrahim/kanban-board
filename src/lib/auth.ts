@@ -1,3 +1,6 @@
+import { useAuthStore } from "@/store/auth-store";
+import { postRequest } from "./api";
+
 export interface SignUpData {
   username: string;
   email: string;
@@ -7,6 +10,11 @@ export interface SignUpData {
 export interface SignInData {
   email: string;
   password: string;
+}
+
+export interface LogoutResponse {
+  message: string;
+  status: string;
 }
 
 export interface AuthResponse {
@@ -54,6 +62,21 @@ export async function signIn(userData: SignInData): Promise<AuthResponse> {
     throw new Error(error.detail || "Sign in failed");
   }
   return response.json();
+}
+
+export async function LogOut(): Promise<LogoutResponse> {
+  const token = useAuthStore.getState().token || localStorage.getItem("auth_token");
+  
+  if (!token) {
+    throw new Error("No authentication token found");
+  }
+
+  try {
+    const response = await postRequest("/api/auth/logout");
+    return response;
+  } catch (error) {
+    throw error;
+  }
 }
 
 export function setAuthToken(token: string): void {

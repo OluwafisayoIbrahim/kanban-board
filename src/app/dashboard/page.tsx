@@ -5,6 +5,8 @@ import { fetchMe } from "@/lib/api";
 import { Loader } from "lucide-react";
 import { JSX, useEffect } from "react";
 import { toast } from "sonner";
+import { useLogout } from "../hooks/useLogout";
+import { LogoutButton } from "@/components/LogOutButton";
 
 
 interface ApiSuccessResponse {
@@ -29,6 +31,8 @@ const WELCOME_MESSAGES: readonly string[] = [
 ] as const;
 
 export default function DashboardPage(): JSX.Element {
+  const logoutMutation = useLogout();
+
   const { 
     data: response, 
     isLoading, 
@@ -38,6 +42,10 @@ export default function DashboardPage(): JSX.Element {
     queryFn: fetchMe,
     retry: false,
   });
+
+  const handleLogout = (): void => {
+    logoutMutation.mutate();
+  }
 
   useEffect((): void => {
     if (response) {
@@ -126,6 +134,8 @@ export default function DashboardPage(): JSX.Element {
             User ID: #{successResponse.id}
           </p>
         </div>
+
+        <LogoutButton />
         
         <div className="bg-white rounded-lg shadow p-6">
           <h2 className="text-xl font-semibold mb-4">Your Kanban Board</h2>
