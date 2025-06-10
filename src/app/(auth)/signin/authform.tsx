@@ -133,7 +133,9 @@ const AuthForm: React.FC<AuthFormProps> = ({ type = "signin", onSubmit }) => {
           </h1>
           {error && (
             <div className="flex justify-center items-center">
-              <p className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mt-4">{error}</p>
+              <p className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mt-4">
+                {error}
+              </p>
             </div>
           )}
 
@@ -196,6 +198,8 @@ const AuthForm: React.FC<AuthFormProps> = ({ type = "signin", onSubmit }) => {
                     </FormLabel>
                     <FormControl>
                       <Input
+                        type="password"
+                        autoComplete="current-password"
                         placeholder="Enter your password"
                         {...field}
                         className="text-[#000000] font-light leading-6 text-[15px] lg:text-[16px] placeholder:text-[#A1A1A1] lg:placeholder:text-[#7D7D7D] focus-visible:outline-none focus-visible:ring-0"
@@ -210,7 +214,11 @@ const AuthForm: React.FC<AuthFormProps> = ({ type = "signin", onSubmit }) => {
                   type="submit"
                   className="font-normal text-[16px] leading-6 w-[106px] h-[56px] cursor-pointer"
                 >
-                  {isLoading ? "Loading..." : type === "signin" ? "Sign In" : "Sign Up"}
+                  {isLoading
+                    ? "Loading..."
+                    : type === "signin"
+                    ? "Sign In"
+                    : "Sign Up"}
                 </Button>
               </div>
             </form>

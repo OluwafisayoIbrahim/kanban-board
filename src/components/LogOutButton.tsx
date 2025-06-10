@@ -1,4 +1,3 @@
-// components/LogoutButton.tsx
 "use client";
 
 import { useLogout } from "@/app/hooks/useLogout";
