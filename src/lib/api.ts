@@ -137,7 +137,6 @@ export async function putFileRequest(endpoint: string, file: File) {
       method: "PUT",
       headers: {
         Authorization: `Bearer ${token}`,
-        // Don't set Content-Type for FormData - let browser set it with boundary
       },
       body: formData,
     });
