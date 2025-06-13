@@ -1,9 +1,13 @@
+"use client"
 import React from "react";
 import { Button } from "./ui/button";
-import { Zap } from "lucide-react";
 import Link from "next/link";
+import { useAuthStore } from "@/store/auth-store";
 
 const HeroSection = () => {
+  const token = useAuthStore((store) => (store.token));
+  const destination = token ? "/dashboard" : "/signup";
+
   return (
     <div className="mx-[20px] mt-[49px] lg:mx-[255px] lg:mt-[114px]">
       <div className="mt-[34px] mx-1 xl:mt-[92px] xl:mx-[7px]">
@@ -17,7 +21,7 @@ const HeroSection = () => {
         more done.
       </p>
       <div className="flex justify-center items-center mt-[30px] mb-[30px]">
-        <Link href="/signin">
+        <Link href={destination}>
         <Button
           variant="outline"
           className="cursor-pointer text-lg text-[#000000] lg:text-2xl text-center rounded-[8px] lg:w-auto lg:h-[64px] h-[56px] font-normal gap-[17px] lg:gap-6"

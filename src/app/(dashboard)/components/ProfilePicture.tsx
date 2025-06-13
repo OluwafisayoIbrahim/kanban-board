@@ -1,254 +1,186 @@
 "use client";
-import React, { useState, useRef } from "react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Camera, X, Upload, Trash2, User } from "lucide-react";
-import { toast } from "sonner";
+import React, { useState, useRef, useEffect, FC } from "react";
+import { useQuery } from "@tanstack/react-query";
 import {
-  getProfilePicture,
-  uploadProfilePicture,
-  changeProfilePicture,
-  deleteProfilePicture,
-} from "@/lib/api";
+  User,
+  Settings,
+  UserCircle,
+  LogOut,
+  Bell,
+  Shield,
+  HelpCircle,
+  LayoutDashboard,
+  Home,
+} from "lucide-react";
+import { usePathname, useRouter } from "next/navigation";
+import { getProfilePicture } from "@/lib/api";
+import { useAuthStore } from "@/store/auth-store";
+import { LogOut as apiLogOut } from "@/lib/auth";
+import { toast } from "sonner";
 
 interface ProfilePictureResponse {
   profile_picture_url: string | null;
   status: string;
+  username?: string;
+  email?: string;
 }
 
-const ProfilePictureComponent: React.FC = () => {
-  const [isUploading, setIsUploading] = useState(false);
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const queryClient = useQueryClient();
+const ProfilePicture: FC = () => {
+  const pathname = usePathname();
+  const [isDropdownOpen, setIsDropdownOpen] = useState<boolean>(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const router = useRouter();
+  const clearToken = useAuthStore((store) => store.clearToken);
 
-  const {
-    data: profileData,
-    isLoading: isLoadingProfile,
-    error: profileError,
-  } = useQuery<ProfilePictureResponse>({
-    queryKey: ["profile-picture"],
-    queryFn: getProfilePicture,
-    retry: 1,
-  });
+  const { data: profileData, isLoading: isLoadingProfile } =
+    useQuery<ProfilePictureResponse>({
+      queryKey: ["profile-picture"],
+      queryFn: getProfilePicture,
+      retry: 1,
+    });
 
-  const uploadMutation = useMutation({
-    mutationFn: async (file: File) => {
-      if (profileData?.profile_picture_url) {
-        return changeProfilePicture(file);
-      } else {
-        return uploadProfilePicture(file);
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
+        setIsDropdownOpen(false);
       }
-    },
-    onSuccess: (data) => {
-      toast.success("Profile picture updated successfully!");
-      queryClient.invalidateQueries({ queryKey: ["profile-picture"] });
-      setPreviewUrl(null);
-      setIsUploading(false);
-      if (fileInputRef.current) {
-        fileInputRef.current.value = "";
-      }
-    },
-    onError: (error: unknown) => {
-      let errorMessage = "Failed to update profile picture";
-      
-      if (error instanceof Error) {
-        errorMessage = error.message;
-      } else if (typeof error === 'string') {
-        errorMessage = error;
-      } else if (error && typeof error === 'object') {
-        const errorObj = error as any;
-        errorMessage = errorObj.detail || errorObj.message || errorObj.error || "Unknown error occurred";
-      }
-      
-      console.error("Upload error:", error);
-      toast.error(errorMessage);
-      setPreviewUrl(null);
-      setIsUploading(false);
-      if (fileInputRef.current) {
-        fileInputRef.current.value = "";
-      }
-    },
-  });
-
-  const deleteMutation = useMutation({
-    mutationFn: deleteProfilePicture,
-    onSuccess: () => {
-      toast.success("Profile picture deleted successfully!");
-      queryClient.invalidateQueries({ queryKey: ["profile-picture"] });
-    },
-    onError: (error: unknown) => {
-      let errorMessage = "Failed to delete profile picture";
-      
-      if (error instanceof Error) {
-        errorMessage = error.message;
-      } else if (typeof error === 'string') {
-        errorMessage = error;
-      } else if (error && typeof error === 'object') {
-        const errorObj = error as any;
-        errorMessage = errorObj.detail || errorObj.message || errorObj.error || "Unknown error occurred";
-      }
-      
-      console.error("Delete error:", error);
-      toast.error(errorMessage);
-    },
-  });
-
-  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-
-    if (!file.type.startsWith("image/")) {
-      toast.error("Please select an image file");
-      return;
-    }
-
-    if (file.size > 5 * 1024 * 1024) {
-      toast.error("File size must be less than 5MB");
-      return;
-    }
-
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      setPreviewUrl(e.target?.result as string);
     };
-    reader.readAsDataURL(file);
 
-    setIsUploading(true);
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+  const handleProfileClick = () => {
+    setIsDropdownOpen(!isDropdownOpen);
   };
 
-  const handleUpload = () => {
-    const file = fileInputRef.current?.files?.[0];
-    if (!file) {
-      toast.error("No file selected");
-      return;
+  const handleMenuItemClick = (path: string) => {
+    setIsDropdownOpen(false);
+    router.push(path);
+  };
+
+  const handleLogout = async () => {
+    setIsDropdownOpen(false);
+    console.log("Logging out...");
+    try {
+      await apiLogOut();
+      clearToken();
+      localStorage.removeItem("auth_token");
+      router.push("/");
+      window.location.href = "/";
+      toast.success("You have been signed out of your account");
+    } catch (error) {
+      console.error("Logout failed", error);
+      toast.error("Logout failed");
     }
-
-    uploadMutation.mutate(file);
-  };
-
-  const handleCancel = () => {
-    setPreviewUrl(null);
-    setIsUploading(false);
-    if (fileInputRef.current) {
-      fileInputRef.current.value = "";
-    }
-  };
-
-  const handleDelete = () => {
-    if (window.confirm("Are you sure you want to delete your profile picture?")) {
-      deleteMutation.mutate();
-    }
-  };
-
-  const triggerFileInput = () => {
-    fileInputRef.current?.click();
   };
 
   if (isLoadingProfile) {
     return (
-      <div className="flex items-center justify-center w-32 h-32 bg-gray-100 rounded-full">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-      </div>
+      <div className="w-8 h-8 bg-gray-200 rounded-full animate-pulse"></div>
     );
   }
 
-  const currentImageUrl = previewUrl || profileData?.profile_picture_url;
+  const allMenuItems = [
+    { icon: UserCircle, label: "Account", path: "/dashboard/profile" },
+    { icon: LayoutDashboard, label: "Dashboard", path: "/dashboard" },
+    { icon: Settings, label: "Settings", path: "/dashboard/settings" },
+    { icon: Bell, label: "Notifications", path: "/settings/notification" },
+    { icon: Shield, label: "Privacy", path: "/dashboard/privacy" },
+    { icon: HelpCircle, label: "Help & Support", path: "/dashboard/help" },
+  ];
+
+  const homeItem = { icon: Home, label: "Home", path: "/" };
+
+  let menuItems = allMenuItems.filter(item =>
+    item.label === "Dashboard" ? pathname === "/" : true
+  );
+  
+
+  if (pathname.startsWith("/dashboard")) {
+    menuItems = [homeItem, ...menuItems];
+  }
 
   return (
-    <div className="flex flex-col items-center space-y-4">
-      <div className="relative group">
-        <div className="w-32 h-32 rounded-full overflow-hidden bg-gray-100 border-4 border-white shadow-lg">
-          {currentImageUrl ? (
+    <div className="relative" ref={dropdownRef}>
+      <button
+        onClick={handleProfileClick}
+        className="flex items-center space-x-2 p-1 cursor-pointer rounded-full transition-colors focus:outline-none"
+      >
+        <div className="w-[98px] h-[98px] rounded-xl overflow-hidden">
+          {profileData?.profile_picture_url ? (
             <img
-              src={currentImageUrl}
+              src={profileData.profile_picture_url}
               alt="Profile"
               className="w-full h-full object-cover"
             />
           ) : (
             <div className="w-full h-full flex items-center justify-center bg-gray-200">
-              <User className="w-12 h-12 text-gray-400" />
+              <User className="w-4 h-4 text-gray-500" />
             </div>
           )}
         </div>
+      </button>
 
-        <button
-          onClick={triggerFileInput}
-          className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-          disabled={uploadMutation.isPending || deleteMutation.isPending}
-        >
-          <Camera className="w-8 h-8 text-white" />
-        </button>
-      </div>
+      {isDropdownOpen && (
+        <div className="absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50">
+          <div className="px-4 py-3 border-b border-gray-100">
+            <div className="flex flex-col items-center space-y-2">
+              <div className="w-12 h-12 rounded-full overflow-hidden">
+                {profileData?.profile_picture_url ? (
+                  <img
+                    src={profileData.profile_picture_url}
+                    alt="Profile"
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center bg-gray-200">
+                    <User className="w-6 h-6 text-gray-500" />
+                  </div>
+                )}
+              </div>
+              <div className="text-center">
+                <p className="text-sm font-medium text-gray-900">
+                  {profileData?.username || "User Name"}
+                </p>
+                <p className="text-xs text-gray-500">
+                  {profileData?.email || "Email Address"}
+                </p>
+              </div>
+            </div>
+          </div>
 
-      <div className="flex space-x-2">
-        {!isUploading ? (
-          <>
-            <button
-              onClick={triggerFileInput}
-              disabled={uploadMutation.isPending || deleteMutation.isPending}
-              className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-            >
-              <Upload className="w-4 h-4" />
-              <span>{profileData?.profile_picture_url ? "Change" : "Upload"}</span>
-            </button>
-
-            {profileData?.profile_picture_url && (
+          <div className="py-1">
+            {menuItems.map((item, index) => (
               <button
-                onClick={handleDelete}
-                disabled={uploadMutation.isPending || deleteMutation.isPending}
-                className="flex items-center space-x-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                key={index}
+                onClick={() => handleMenuItemClick(item.path)}
+                className="w-full flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
               >
-                <Trash2 className="w-4 h-4" />
-                <span>Delete</span>
+                <item.icon className="w-4 h-4 mr-3 text-gray-500" />
+                {item.label}
               </button>
-            )}
-          </>
-        ) : (
-          <div className="flex space-x-2">
-            <button
-              onClick={handleUpload}
-              disabled={uploadMutation.isPending}
-              className="flex items-center space-x-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-            >
-              {uploadMutation.isPending ? (
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-              ) : (
-                <Upload className="w-4 h-4" />
-              )}
-              <span>{uploadMutation.isPending ? "Uploading..." : "Confirm"}</span>
-            </button>
+            ))}
+          </div>
 
+          <div className="border-t border-gray-100 py-1">
             <button
-              onClick={handleCancel}
-              disabled={uploadMutation.isPending}
-              className="flex items-center space-x-2 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              onClick={handleLogout}
+              className="w-full flex items-center px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
             >
-              <X className="w-4 h-4" />
-              <span>Cancel</span>
+              <LogOut className="w-4 h-4 mr-3" />
+              Sign Out
             </button>
           </div>
-        )}
-      </div>
-
-      <input
-        ref={fileInputRef}
-        type="file"
-        accept="image/*"
-        onChange={handleFileSelect}
-        className="hidden"
-      />
-
-      {deleteMutation.isPending && (
-        <p className="text-sm text-gray-600">Deleting profile picture...</p>
-      )}
-
-      {profileError && (
-        <p className="text-sm text-red-600">
-          Failed to load profile picture
-        </p>
+        </div>
       )}
     </div>
   );
 };
 
-export default ProfilePictureComponent;
+export default ProfilePicture;

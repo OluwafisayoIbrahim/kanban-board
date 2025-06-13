@@ -1,28 +1,6 @@
-// components/Notifications.tsx
 "use client";
-
 import React, { JSX, useState, useEffect, FC } from "react";
-import {
-  Bell,
-  BellOff,
-  Settings,
-  X,
-  Clock,
-  AlertTriangle,
-  Calendar,
-} from "lucide-react";
-import Link from "next/link";
-
-const toast = {
-  success: (message: string): void => {
-    const toastEl = document.createElement("div");
-    toastEl.className =
-      "fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 animate-pulse";
-    toastEl.textContent = message;
-    document.body.appendChild(toastEl);
-    setTimeout(() => document.body.removeChild(toastEl), 3000);
-  },
-};
+import { Bell, BellOff, X, Clock, AlertTriangle, Calendar } from "lucide-react";
 
 interface Notification {
   id: number;
@@ -71,7 +49,6 @@ export const Notifications: FC = () => {
     setIsNotificationsEnabled(saved === "true");
   }, []);
 
-  // 3) Sync notifications with toggle
   useEffect(() => {
     setNotifications(isNotificationsEnabled ? mockNotifications : []);
     if (!isNotificationsEnabled) {
@@ -122,14 +99,14 @@ export const Notifications: FC = () => {
   };
 
   return (
-    <div className="hidden md:flex items-center space-x-6 mx-4 relative">
+    <div className="hidden md:flex items-center space-x-20 mx-4 relative">
       <div className="relative">
         <button
           onClick={toggleNotificationPanel}
           className={`p-2 rounded-lg transition-colors ${
             isNotificationsEnabled
-              ? "hover:bg-purple-50 text-purple-600"
-              : "hover:bg-gray-100 text-gray-400"
+              ? "hover:bg-gray-800 text-white cursor-pointer"
+              : "hover:bg-gray-100 text-gray-400 cursor-pointer"
           }`}
           title={
             isNotificationsEnabled
@@ -216,14 +193,6 @@ export const Notifications: FC = () => {
           </>
         )}
       </div>
-
-      <Link
-        href="/settings/notification"
-        className="p-2 rounded-lg transition-colors hover:bg-gray-100"
-        title="Notification settings"
-      >
-        <Settings className="w-6 h-6 text-gray-400 hover:text-gray-600" />
-      </Link>
     </div>
   );
 };
