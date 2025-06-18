@@ -37,7 +37,7 @@ const Footer = () => {
         <div className="col-span-1 lg:col-span-2">
           <div className="grid grid-cols-2 gap-x-6 mt-4 lg:mt-0">
             <div className="col-span-1 lg:mt-3 text-center">
-              <h3 className="font-bold text-[11px] lg:text-[24px] mb-[20px]">
+              <h3 className="font-bold text-[11px] lg:text-[24px] mb-[20px] text-[#FFFFFF] ">
                 Product
               </h3>
               <ul className="space-y-5 lg:space-y-[30px] text-[#FFFFFF] font-normal text-[10px] lg:text-[16px]">
@@ -76,7 +76,7 @@ const Footer = () => {
               </ul>
             </div>
             <div className="col-span-1 lg:mt-3 text-center">
-              <h3 className="font-bold text-[11px] lg:text-[24px] mb-[20px]">
+              <h3 className="font-bold text-[11px] lg:text-[24px] mb-[20px] text-[#FFFFFF]">
                 Support
               </h3>
               <ul className="space-y-5 lg:space-y-[30px] text-[#FFFFFF] font-normal text-[10px] lg:text-[16px]">
