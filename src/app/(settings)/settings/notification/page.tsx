@@ -1,14 +1,12 @@
-// app/settings/notifications/page.tsx
 "use client";
 
 import { useState, useEffect } from "react";
-import { Switch } from "../../../../components/ui/switch";  // from shadcn-ui
-import { toast } from "sonner";                 // or your toast lib
+import { Switch } from "@/components/ui/switch";
+import { toast } from "sonner";
 
-export default function NotificationSettingsPage() {
+export function NotificationSettingsPage() {
   const [enabled, setEnabled] = useState<boolean>(false);
 
-  // Load saved preference from localStorage (or fetch from your API)
   useEffect(() => {
     const saved = localStorage.getItem("notifications_enabled");
     setEnabled(saved === "true");
@@ -40,4 +38,6 @@ export default function NotificationSettingsPage() {
       </div>
     </div>
   );
-}
+};
+
+export default NotificationSettingsPage;

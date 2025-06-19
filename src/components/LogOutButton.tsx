@@ -1,14 +1,8 @@
 "use client";
 
-import { useLogout } from "@/app/hooks/useLogout";
+import { useLogout } from "@/hooks/useLogout";
 import { LogOut, Loader } from "lucide-react";
-
-interface LogoutButtonProps {
-  variant?: "primary" | "secondary" | "danger";
-  size?: "sm" | "md" | "lg";
-  showIcon?: boolean;
-  className?: string;
-}
+import { LogoutButtonProps } from "@/types/index";
 
 export function LogoutButton({ 
   variant = "danger", 

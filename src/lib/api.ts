@@ -73,7 +73,6 @@ export async function postFileRequest(endpoint: string, file: File) {
       method: "POST",
       headers: {
         Authorization: `Bearer ${token}`,
-        // Don't set Content-Type for FormData - let browser set it with boundary
       },
       body: formData,
     });
@@ -208,17 +207,3 @@ export async function deleteRequest(endpoint: string) {
 
   return data;
 }
-
-export const getProfilePicture = () =>
-  getRequest("/api/profile/profile-picture");
-
-export const uploadProfilePicture = (file: File) =>
-  postFileRequest("/api/profile/upload-profile-picture", file);
-
-export const changeProfilePicture = (file: File) =>
-  putFileRequest("/api/profile/profile-picture", file);
-
-export const deleteProfilePicture = () =>
-  deleteRequest("/api/profile/profile-picture");
-
-export const fetchMe = () => getRequest("/api/auth/me");

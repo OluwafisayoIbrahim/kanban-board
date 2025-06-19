@@ -1,15 +1,73 @@
 "use client";
 import React, { JSX, useState, useEffect, FC } from "react";
 import { Bell, BellOff, X, Clock, AlertTriangle, Calendar } from "lucide-react";
+import { Notification } from "@/types/index";
 
-interface Notification {
-  id: number;
-  type: "deadline" | "reminder" | "overdue";
-  title: string;
-  message: string;
-  priority: "high" | "medium" | "low";
-  timestamp: Date;
-}
+const mockNotifications: Notification[] = [
+  {
+    id: 1,
+    type: "deadline",
+    title: "Project Review Due Soon",
+    message: "Due in 2 hours",
+    priority: "high",
+    timestamp: new Date(Date.now() - 1000 * 60 * 30).toISOString(),
+  },
+  {
+    id: 2,
+    type: "reminder",
+    title: "Daily Standup Meeting",
+    message: "Starts in 15 minutes",
+    priority: "medium",
+    timestamp: new Date(Date.now() - 1000 * 60 * 45).toISOString(),
+  },
+  {
+    id: 3,
+    type: "overdue",
+    title: "Bug Fix Task Overdue",
+    message: "Overdue by 1 day",
+    priority: "high",
+    timestamp: new Date(Date.now() - 1000 * 60 * 60 * 25).toISOString(),
+  },
+];
+
+const getPriorityColor = (priority: Notification["priority"]): string => {
+  switch (priority) {
+    case "high":
+      return "text-red-500";
+    case "medium":
+      return "text-yellow-500";
+    case "low":
+      return "text-green-500";
+    default:
+      return "text-gray-500";
+  }
+};
+
+const getNotificationIcon = (type: Notification["type"]): JSX.Element => {
+  switch (type) {
+    case "deadline":
+      return <Clock className="w-4 h-4" />;
+    case "reminder":
+      return <Calendar className="w-4 h-4" />;
+    case "overdue":
+      return <AlertTriangle className="w-4 h-4" />;
+    default:
+      return <Bell className="w-4 h-4" />;
+  }
+};
+
+// Utility: Format time ago from ISO string
+const formatTimeAgo = (timestamp: string): string => {
+  const now = new Date().getTime();
+  const date = new Date(timestamp);
+  const diff = now - date.getTime();
+  const minutes = Math.floor(diff / (1000 * 60));
+  const hours = Math.floor(diff / (1000 * 60 * 60));
+  const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+  if (days > 0) return `${days}d ago`;
+  if (hours > 0) return `${hours}h ago`;
+  return `${minutes}m ago`;
+};
 
 export const Notifications: FC = () => {
   const [isNotificationsEnabled, setIsNotificationsEnabled] =
@@ -17,38 +75,13 @@ export const Notifications: FC = () => {
   const [showNotifications, setShowNotifications] = useState<boolean>(false);
   const [notifications, setNotifications] = useState<Notification[]>([]);
 
-  const mockNotifications: Notification[] = [
-    {
-      id: 1,
-      type: "deadline",
-      title: "Project Review Due Soon",
-      message: "Due in 2 hours",
-      priority: "high",
-      timestamp: new Date(Date.now() - 1000 * 60 * 30),
-    },
-    {
-      id: 2,
-      type: "reminder",
-      title: "Daily Standup Meeting",
-      message: "Starts in 15 minutes",
-      priority: "medium",
-      timestamp: new Date(Date.now() - 1000 * 60 * 45),
-    },
-    {
-      id: 3,
-      type: "overdue",
-      title: "Bug Fix Task Overdue",
-      message: "Overdue by 1 day",
-      priority: "high",
-      timestamp: new Date(Date.now() - 1000 * 60 * 60 * 25),
-    },
-  ];
-
+  // Load notification enabled state from localStorage
   useEffect(() => {
     const saved = localStorage.getItem("notifications_enabled");
     setIsNotificationsEnabled(saved === "true");
   }, []);
 
+  // Set notifications based on enabled state
   useEffect(() => {
     setNotifications(isNotificationsEnabled ? mockNotifications : []);
     if (!isNotificationsEnabled) {
@@ -60,42 +93,6 @@ export const Notifications: FC = () => {
     if (isNotificationsEnabled) {
       setShowNotifications((prev) => !prev);
     }
-  };
-  const getPriorityColor = (priority: Notification["priority"]): string => {
-    switch (priority) {
-      case "high":
-        return "text-red-500";
-      case "medium":
-        return "text-yellow-500";
-      case "low":
-        return "text-green-500";
-      default:
-        return "text-gray-500";
-    }
-  };
-
-  const getNotificationIcon = (type: Notification["type"]): JSX.Element => {
-    switch (type) {
-      case "deadline":
-        return <Clock className="w-4 h-4" />;
-      case "reminder":
-        return <Calendar className="w-4 h-4" />;
-      case "overdue":
-        return <AlertTriangle className="w-4 h-4" />;
-      default:
-        return <Bell className="w-4 h-4" />;
-    }
-  };
-
-  const formatTimeAgo = (timestamp: Date): string => {
-    const now = new Date().getTime();
-    const diff = now - timestamp.getTime();
-    const minutes = Math.floor(diff / (1000 * 60));
-    const hours = Math.floor(diff / (1000 * 60 * 60));
-    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-    if (days > 0) return `${days}d ago`;
-    if (hours > 0) return `${hours}h ago`;
-    return `${minutes}m ago`;
   };
 
   return (

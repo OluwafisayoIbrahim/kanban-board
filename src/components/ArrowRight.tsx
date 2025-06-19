@@ -1,8 +1,6 @@
 import * as React from "react";
+import { IconProps } from "@/types/index";
 
-type IconProps = React.SVGProps<SVGElement> & {
-    className?: string;
-}
 const SvgIcon: React.FC<IconProps> = ({className}) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"

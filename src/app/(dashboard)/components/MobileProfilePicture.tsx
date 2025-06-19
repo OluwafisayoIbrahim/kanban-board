@@ -21,24 +21,21 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
-import { getProfilePicture } from "@/lib/api";
+import { getProfilePicture } from "@/app/api/profile";    
 import { useAuthStore } from "@/store/auth-store";
-import { LogOut as apiLogOut } from "@/lib/auth";
+import { LogOut as apiLogOut } from "@/app/api/auth";
 import { toast } from "sonner";
 import { usePathname, useRouter } from "next/navigation";
+import { ProfilePictureResponse } from "@/types/index";
 
-interface ProfileData {
-  profile_picture_url: string | null;
-  username: string;
-  email: string;
-}
+
 
 const MobileProfileMenu: FC = () => {
   const pathname = usePathname();
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const clearToken = useAuthStore((s) => s.clearToken);
-  const { data: profile } = useQuery<ProfileData>({
+  const { data: profile } = useQuery<ProfilePictureResponse>({
     queryKey: ["profile-picture"],
     queryFn: getProfilePicture,
     retry: 1,

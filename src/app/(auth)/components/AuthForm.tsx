@@ -19,46 +19,12 @@ import { useRouter } from "next/navigation";
 import {
   setAuthToken,
   signIn,
-  SignInData,
   signUp,
-  SignUpData,
-} from "@/lib/auth";
+} from "@/app/api/auth";
 import { useAuthStore } from "@/store/auth-store";
-
-type AuthType = "signin" | "signup";
-
-interface AuthFormProps {
-  type?: AuthType;
-  onSubmit?: (
-    formData:
-      | { email: string; password: string }
-      | { username: string; email: string; password: string }
-  ) => void;
-}
-
-const baseAuthSchema = z
-  .object({
-    email: z.string().email({ message: "Please enter a valid email address" }),
-    password: z
-      .string()
-      .min(6, { message: "Password must be at least 6 characters" })
-      .refine((pw) => /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(pw), {
-        message: "Password must contain at least one special character",
-      }),
-  })
-  .required();
-
-const SignUpSchema = baseAuthSchema
-  .extend({
-    username: z
-      .string()
-      .min(3, { message: "Username must be at least 3 characters" })
-      .max(20, { message: "Username must be at most 20 characters" }),
-  })
-  .refine((data) => data.username !== data.password, {
-    message: "Username and password must not match.",
-    path: ["password"],
-  });
+import { SignUpData, SignInData } from "@/types/index";
+import { AuthFormProps } from "@/types/index";
+import { baseAuthSchema, SignUpSchema } from "@/schemas/index";
 
 const SignInSchema = baseAuthSchema;
 
@@ -66,7 +32,7 @@ type SignUpFormSchema = z.infer<typeof SignUpSchema>;
 type SignInFormSchema = z.infer<typeof SignInSchema>;
 
 const AuthForm: React.FC<AuthFormProps> = ({ type = "signin", onSubmit }) => {
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
 
@@ -79,13 +45,13 @@ const AuthForm: React.FC<AuthFormProps> = ({ type = "signin", onSubmit }) => {
     defaultValues: { username: "", email: "", password: "" },
   });
 
-  const handleRedirect = () => {
+  const handleRedirect = (): void => {
     router.push("/dashboard");
   };
 
   const onSubmitHandler = async (
     values: SignUpFormSchema | SignInFormSchema
-  ) => {
+  ): Promise<void> => {
     setIsLoading(true);
     setError(null);
 

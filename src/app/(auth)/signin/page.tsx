@@ -1,6 +1,6 @@
 "use client";
 import React, { Suspense } from "react";
-import AuthForm from "./authform";
+import AuthForm from "../components/AuthForm";
 import { useSearchParams } from "next/navigation";
 
 const SignInContent = () => {

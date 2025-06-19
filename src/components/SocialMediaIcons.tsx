@@ -1,8 +1,5 @@
 import * as React from "react";
-
-type IconProps = React.SVGProps<SVGElement> & {
-    className?: string;
-}
+import { IconProps } from "@/types/index";
 
 export const Instagram: React.FC<IconProps> = ({className}) => (
   <svg

@@ -1,13 +1,10 @@
 "use client";
 
-import { useEffect, useState, ReactNode } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/store/auth-store";
 import { toast } from "sonner";
-
-interface ProtectedRouteProps {
-  children: ReactNode;
-}
+import { ProtectedRouteProps } from "@/types/index";
 
 export function ProtectedRoute({ children }: ProtectedRouteProps) {
   const router = useRouter();

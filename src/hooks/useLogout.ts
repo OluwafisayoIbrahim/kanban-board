@@ -1,4 +1,4 @@
-// hooks/useLogout.ts
+
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { LogOut } from "@/lib/auth";
 import { toast } from "sonner";

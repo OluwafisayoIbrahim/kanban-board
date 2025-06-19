@@ -9,11 +9,7 @@ import {
   changeProfilePicture,
   deleteProfilePicture,
 } from "@/lib/api";
-
-interface ProfileResponse {
-  profile_picture_url: string | null;
-  status: string;
-}
+import { ProfileResponse } from "@/types/index";
 
 const Profile: FC = () => {
   const [isUploading, setIsUploading] = useState(false);

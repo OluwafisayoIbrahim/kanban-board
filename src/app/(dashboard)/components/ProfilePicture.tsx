@@ -13,17 +13,11 @@ import {
   Home,
 } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
-import { getProfilePicture } from "@/lib/api";
+import { getProfilePicture } from "@/app/api/profile";
 import { useAuthStore } from "@/store/auth-store";
-import { LogOut as apiLogOut } from "@/lib/auth";
+import { LogOut as apiLogOut } from "@/app/api/auth";
 import { toast } from "sonner";
-
-interface ProfilePictureResponse {
-  profile_picture_url: string | null;
-  status: string;
-  username?: string;
-  email?: string;
-}
+import { ProfilePictureResponse } from "@/types/index";  
 
 const ProfilePicture: FC = () => {
   const pathname = usePathname();

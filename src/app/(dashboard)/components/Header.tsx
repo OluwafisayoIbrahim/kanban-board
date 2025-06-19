@@ -1,5 +1,5 @@
 "use client";
-import { FC, useState } from "react";
+import { FC } from "react";
 import Logo from "../../../components/Logo";
 import LogoMobile from "../../../components/LogoMobile";
 import SearchBar from "./SearchBar";
