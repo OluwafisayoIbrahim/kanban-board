@@ -24,7 +24,7 @@ export async function getRequest(endpoint: string) {
   return data;
 }
 
-export async function postRequest(endpoint: string, body?: any) {
+export async function postRequest<T = unknown>(endpoint: string, body?: unknown): Promise<T> {
   const token = useAuthStore.getState().token || localStorage.getItem("auth_token");
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
@@ -53,7 +53,7 @@ export async function postRequest(endpoint: string, body?: any) {
   return data;
 }
 
-export async function postFileRequest(endpoint: string, file: File) {
+export async function postFileRequest<T = unknown>(endpoint: string, file: File): Promise<T> {
   const token = useAuthStore.getState().token || localStorage.getItem("auth_token");
   
   console.log("Upload attempt:", {
@@ -86,21 +86,21 @@ export async function postFileRequest(endpoint: string, file: File) {
       }
       
       let errorMessage = "Request failed";
-      let errorDetails = {};
+      let errorDetails: Record<string, unknown> = {};
       
       try {
         const data = await res.json();
         console.log("Error response data:", data);
         errorMessage = data.detail || data.message || `HTTP ${res.status}: ${res.statusText}`;
         errorDetails = data;
-      } catch (e) {
+      } catch {
         console.log("Failed to parse error response as JSON");
         errorMessage = `HTTP ${res.status}: ${res.statusText}`;
       }
       
       const error = new Error(errorMessage);
-      (error as any).details = errorDetails;
-      (error as any).status = res.status;
+      (error as Error & { details: Record<string, unknown>; status: number }).details = errorDetails;
+      (error as Error & { details: Record<string, unknown>; status: number }).status = res.status;
       throw error;
     }
     
@@ -117,7 +117,7 @@ export async function postFileRequest(endpoint: string, file: File) {
   }
 }
 
-export async function putFileRequest(endpoint: string, file: File) {
+export async function putFileRequest<T = unknown>(endpoint: string, file: File): Promise<T> {
   const token = useAuthStore.getState().token || localStorage.getItem("auth_token");
   
   console.log("Update attempt:", {
@@ -149,21 +149,21 @@ export async function putFileRequest(endpoint: string, file: File) {
       }
       
       let errorMessage = "Request failed";
-      let errorDetails = {};
+      let errorDetails: Record<string, unknown> = {};
       
       try {
         const data = await res.json();
         console.log("Error response data:", data);
         errorMessage = data.detail || data.message || `HTTP ${res.status}: ${res.statusText}`;
         errorDetails = data;
-      } catch (e) {
+      } catch {
         console.log("Failed to parse error response as JSON");
         errorMessage = `HTTP ${res.status}: ${res.statusText}`;
       }
       
       const error = new Error(errorMessage);
-      (error as any).details = errorDetails;
-      (error as any).status = res.status;
+      (error as Error & { details: Record<string, unknown>; status: number }).details = errorDetails;
+      (error as Error & { details: Record<string, unknown>; status: number }).status = res.status;
       throw error;
     }
     

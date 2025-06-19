@@ -117,7 +117,7 @@ export interface User {
 }
 
 export interface AuthState {
-  clearToken: any;
+  clearToken: () => void;
   token: string | null;
   user: User | null;
   setToken: (token: string) => void;

@@ -1,6 +1,5 @@
-
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { LogOut } from "@/lib/auth";
+import { LogOut } from "@/app/api/auth";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/store/auth-store";
@@ -18,37 +17,26 @@ const LOGGED_OUT_MESSAGES = [
 function getRandomMessage(messages: string[]) {
   return messages[Math.floor(Math.random() * messages.length)];
 }
+
 export function useLogout() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const clearToken = useAuthStore((state) => state.clearToken);
 
-  return useMutation({
+  const logoutMutation = useMutation({
     mutationFn: LogOut,
-    onSuccess: (data) => {
+    onSuccess: () => {
       clearToken();
       localStorage.removeItem("auth_token");
-    
       queryClient.clear();
-      
-      toast.success(`${getRandomMessage(LOGGED_OUT_MESSAGES)}`, {
-        description: "You have been signed out of your account",
-        duration: 3000,
-      });
-      
-      router.push("/signin");
+      toast.success(getRandomMessage(LOGGED_OUT_MESSAGES));
+      router.push("/");
     },
-    onError: (error) => {
-      clearToken();
-      localStorage.removeItem("auth_token");
-      queryClient.clear();
-      
-      toast.error("Logout error", {
-        description: error.message || "Something went wrong during logout",
-        duration: 4000,
-      });
-      
-      router.push("/signin");
+    onError: (error: unknown) => {
+      console.error("Logout error:", error);
+      toast.error("Logout failed. Please try again.");
     },
   });
+
+  return logoutMutation;
 }

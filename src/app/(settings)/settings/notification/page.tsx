@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 
-export function NotificationSettingsPage() {
+ function NotificationSettingsPage() {
   const [enabled, setEnabled] = useState<boolean>(false);
 
   useEffect(() => {
@@ -38,6 +38,6 @@ export function NotificationSettingsPage() {
       </div>
     </div>
   );
-};
+}
 
 export default NotificationSettingsPage;

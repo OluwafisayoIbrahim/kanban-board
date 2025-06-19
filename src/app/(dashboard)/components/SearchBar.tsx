@@ -1,5 +1,5 @@
 "use client";
-import { FC, useRef, useState, useEffect } from "react";
+import { FC, useRef, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import {
   Command,

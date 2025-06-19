@@ -1,9 +1,5 @@
-import { useAuthStore } from "@/store/auth-store";
 import { postRequest } from "@/lib/api";
-import { SignUpData, SignInData, AuthResponse, APIError, LogoutResponse } from "@/types/index";
-
-const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8000";
+import { SignUpData, SignInData, AuthResponse, LogoutResponse } from "@/types/index";
 
 export async function signUp(userData: SignUpData): Promise<AuthResponse> {
   return postRequest("/api/auth/signup", userData);

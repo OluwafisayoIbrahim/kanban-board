@@ -8,8 +8,8 @@ import {
   uploadProfilePicture,
   changeProfilePicture,
   deleteProfilePicture,
-} from "@/lib/api";
-import { ProfileResponse } from "@/types/index";
+} from "@/app/api/profile";
+import { ProfilePictureResponse } from "@/types/index";
 
 const Profile: FC = () => {
   const [isUploading, setIsUploading] = useState(false);
@@ -21,7 +21,7 @@ const Profile: FC = () => {
     data: profileData,
     isLoading: isLoadingProfile,
     error: profileError,
-  } = useQuery<ProfileResponse>({
+  } = useQuery<ProfilePictureResponse>({
     queryKey: ["profile-picture"],
     queryFn: getProfilePicture,
     retry: 1,
@@ -35,7 +35,7 @@ const Profile: FC = () => {
         return uploadProfilePicture(file);
       }
     },
-    onSuccess: (data) => {
+    onSuccess: () => {
       toast.success("Profile picture updated successfully!");
       queryClient.invalidateQueries({ queryKey: ["profile-picture"] });
       setPreviewUrl(null);
@@ -52,8 +52,8 @@ const Profile: FC = () => {
       } else if (typeof error === 'string') {
         errorMessage = error;
       } else if (error && typeof error === 'object') {
-        const errorObj = error as any;
-        errorMessage = errorObj.detail || errorObj.message || errorObj.error || "Unknown error occurred";
+        const errorObj = error as Record<string, unknown>;
+        errorMessage = (errorObj.detail as string) || (errorObj.message as string) || (errorObj.error as string) || "Unknown error occurred";
       }
       
       console.error("Upload error:", error);
@@ -80,8 +80,8 @@ const Profile: FC = () => {
       } else if (typeof error === 'string') {
         errorMessage = error;
       } else if (error && typeof error === 'object') {
-        const errorObj = error as any;
-        errorMessage = errorObj.detail || errorObj.message || errorObj.error || "Unknown error occurred";
+        const errorObj = error as Record<string, unknown>;
+        errorMessage = (errorObj.detail as string) || (errorObj.message as string) || (errorObj.error as string) || "Unknown error occurred";
       }
       
       console.error("Delete error:", error);
