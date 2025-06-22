@@ -1,34 +1,10 @@
 "use client";
 import React, { JSX, useState, useEffect, FC } from "react";
-import { Bell, BellOff, X, Clock, AlertTriangle, Calendar } from "lucide-react";
+import { Bell, BellOff, X, Clock, AlertTriangle, Calendar, UserPlus, Users, Check, X as XIcon } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useNotificationStore } from "@/store/notification-store";
 import { Notification } from "@/types/index";
-
-const mockNotifications: Notification[] = [
-  {
-    id: 1,
-    type: "deadline",
-    title: "Project Review Due Soon",
-    message: "Due in 2 hours",
-    priority: "high",
-    timestamp: new Date(Date.now() - 1000 * 60 * 30).toISOString(),
-  },
-  {
-    id: 2,
-    type: "reminder",
-    title: "Daily Standup Meeting",
-    message: "Starts in 15 minutes",
-    priority: "medium",
-    timestamp: new Date(Date.now() - 1000 * 60 * 45).toISOString(),
-  },
-  {
-    id: 3,
-    type: "overdue",
-    title: "Bug Fix Task Overdue",
-    message: "Overdue by 1 day",
-    priority: "high",
-    timestamp: new Date(Date.now() - 1000 * 60 * 60 * 25).toISOString(),
-  },
-];
+import { formatNotificationTime } from '@/lib/utils';
 
 const getPriorityColor = (priority: Notification["priority"]): string => {
   switch (priority) {
@@ -45,54 +21,99 @@ const getPriorityColor = (priority: Notification["priority"]): string => {
 
 const getNotificationIcon = (type: Notification["type"]): JSX.Element => {
   switch (type) {
+    case "friend_request":
+      return <UserPlus className="w-4 h-4" />;
+    case "friend_accept":
+      return <Check className="w-4 h-4" />;
+    case "friend_decline":
+      return <XIcon className="w-4 h-4" />;
+    case "friend_removed_by_other":
+      return <Users className="w-4 h-4" />;
+    case "friend_removed_by_you":
+      return <Users className="w-4 h-4" />;
     case "deadline":
       return <Clock className="w-4 h-4" />;
     case "reminder":
       return <Calendar className="w-4 h-4" />;
     case "overdue":
       return <AlertTriangle className="w-4 h-4" />;
+    case "task_assigned":
+      return <Users className="w-4 h-4" />;
+    case "task_completed":
+      return <Check className="w-4 h-4" />;
     default:
       return <Bell className="w-4 h-4" />;
   }
 };
 
-// Utility: Format time ago from ISO string
-const formatTimeAgo = (timestamp: string): string => {
-  const now = new Date().getTime();
-  const date = new Date(timestamp);
-  const diff = now - date.getTime();
-  const minutes = Math.floor(diff / (1000 * 60));
-  const hours = Math.floor(diff / (1000 * 60 * 60));
-  const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-  if (days > 0) return `${days}d ago`;
-  if (hours > 0) return `${hours}h ago`;
-  return `${minutes}m ago`;
-};
-
 export const Notifications: FC = () => {
-  const [isNotificationsEnabled, setIsNotificationsEnabled] =
-    useState<boolean>(false);
+  const router = useRouter();
   const [showNotifications, setShowNotifications] = useState<boolean>(false);
-  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [timestampUpdate, setTimestampUpdate] = useState(0); 
+  
+  const {
+    notifications,
+    settings,
+    unreadCount,
+    isLoading,
+    deletingNotificationId,
+    fetchNotifications,
+    fetchUnreadCount,
+    markAsRead,
+    markAllAsRead,
+    removeNotification,
+    setHasNewNotifications,
+  } = useNotificationStore();
 
-  // Load notification enabled state from localStorage
+  
   useEffect(() => {
-    const saved = localStorage.getItem("notifications_enabled");
-    setIsNotificationsEnabled(saved === "true");
+    if (notifications.length === 0) {
+      fetchNotifications();
+    }
+    fetchUnreadCount();
+  }, [notifications.length, fetchNotifications, fetchUnreadCount]);
+
+  
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setTimestampUpdate(prev => {
+        const newValue = prev + 1;
+        return newValue;
+      });
+    }, 10000); 
+
+    return () => clearInterval(interval);
   }, []);
 
-  // Set notifications based on enabled state
-  useEffect(() => {
-    setNotifications(isNotificationsEnabled ? mockNotifications : []);
-    if (!isNotificationsEnabled) {
-      setShowNotifications(false);
-    }
-  }, [isNotificationsEnabled]);
-
   const toggleNotificationPanel = (): void => {
-    if (isNotificationsEnabled) {
+    if (settings.enabled) {
       setShowNotifications((prev) => !prev);
+      if (!showNotifications) {
+        setHasNewNotifications(false);
+        fetchNotifications();
+        fetchUnreadCount();
+      }
     }
+  };
+
+  const handleNotificationClick = async (notification: Notification) => {
+    
+    await markAsRead(notification.id);
+    
+    if (notification.action_url) {
+      router.push(notification.action_url);
+    }
+    
+    setShowNotifications(false);
+  };
+
+  const handleMarkAllAsRead = async () => {
+    await markAllAsRead();
+  };
+
+  const handleRemoveNotification = async (e: React.MouseEvent, notificationId: string) => {
+    e.stopPropagation();
+    await removeNotification(notificationId);
   };
 
   return (
@@ -101,28 +122,28 @@ export const Notifications: FC = () => {
         <button
           onClick={toggleNotificationPanel}
           className={`p-2 rounded-lg transition-colors ${
-            isNotificationsEnabled
+            settings.enabled
               ? "hover:bg-gray-800 text-white cursor-pointer"
               : "hover:bg-gray-100 text-gray-400 cursor-pointer"
           }`}
           title={
-            isNotificationsEnabled
+            settings.enabled
               ? "View notifications"
               : "Notifications disabled"
           }
         >
-          {isNotificationsEnabled ? (
+          {settings.enabled ? (
             <Bell className="w-6 h-6" />
           ) : (
             <BellOff className="w-6 h-6" />
           )}
-          {isNotificationsEnabled && notifications.length > 0 && (
+          {settings.enabled && unreadCount > 0 && (
             <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-              {notifications.length}
+              {unreadCount}
             </span>
           )}
         </button>
-        {showNotifications && isNotificationsEnabled && (
+        {showNotifications && settings.enabled && (
           <>
             <div
               className="fixed inset-0 z-40 bg-transparent"
@@ -139,36 +160,57 @@ export const Notifications: FC = () => {
                 </button>
               </div>
               <div className="max-h-96 overflow-y-auto">
-                {notifications.length > 0 ? (
-                  notifications.map((n) => (
+                {isLoading ? (
+                  <div className="p-8 text-center text-gray-500">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-2"></div>
+                    <p>Loading notifications...</p>
+                  </div>
+                ) : notifications.length > 0 ? (
+                  notifications.map((notification) => (
                     <div
-                      key={n.id}
-                      className="p-4 border-b border-gray-50 hover:bg-gray-50"
+                      key={notification.id}
+                      className={`group p-4 border-b border-gray-50 hover:bg-gray-50 cursor-pointer transition-colors ${
+                        !notification.is_read ? 'bg-blue-50' : ''
+                      }`}
+                      onClick={() => handleNotificationClick(notification)}
                     >
                       <div className="flex items-start space-x-3">
-                        <div className={`mt-1 ${getPriorityColor(n.priority)}`}>
-                          {getNotificationIcon(n.type)}
+                        <div className={`mt-1 ${getPriorityColor(notification.priority)}`}>
+                          {getNotificationIcon(notification.type)}
                         </div>
                         <div className="flex-1 min-w-0">
                           <p className="text-sm font-medium text-gray-900 truncate">
-                            {n.title}
+                            {notification.title}
                           </p>
                           <p className="text-sm text-gray-600 mt-1">
-                            {n.message}
+                            {notification.message}
                           </p>
                           <p className="text-xs text-gray-400 mt-2">
-                            {formatTimeAgo(n.timestamp)}
+                            {formatNotificationTime(notification, timestampUpdate)}
                           </p>
                         </div>
-                        <div
-                          className={`w-2 h-2 rounded-full mt-2 ${
-                            n.priority === "high"
-                              ? "bg-red-500"
-                              : n.priority === "medium"
-                              ? "bg-yellow-500"
-                              : "bg-green-500"
-                          }`}
-                        />
+                        <div className="flex flex-col items-end space-y-1">
+                          <div
+                            className={`w-2 h-2 rounded-full ${
+                              notification.priority === "high"
+                                ? "bg-red-500"
+                                : notification.priority === "medium"
+                                ? "bg-yellow-500"
+                                : "bg-green-500"
+                            }`}
+                          />
+                          <button
+                            onClick={(e) => handleRemoveNotification(e, notification.id)}
+                            disabled={deletingNotificationId === notification.id}
+                            className="p-1 hover:bg-gray-200 rounded opacity-0 group-hover:opacity-100 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
+                          >
+                            {deletingNotificationId === notification.id ? (
+                              <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-gray-400"></div>
+                            ) : (
+                              <X className="w-3 h-3 text-gray-400" />
+                            )}
+                          </button>
+                        </div>
                       </div>
                     </div>
                   ))
@@ -181,7 +223,10 @@ export const Notifications: FC = () => {
               </div>
               {notifications.length > 0 && (
                 <div className="p-3 border-t border-gray-100">
-                  <button className="w-full text-center text-sm text-purple-600 hover:text-purple-700 font-medium">
+                  <button 
+                    onClick={handleMarkAllAsRead}
+                    className="w-full text-center text-sm text-purple-600 hover:text-purple-700 font-medium"
+                  >
                     Mark all as read
                   </button>
                 </div>
@@ -193,5 +238,3 @@ export const Notifications: FC = () => {
     </div>
   );
 };
-
-export default Notifications;

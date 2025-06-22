@@ -1,6 +1,7 @@
 import { useAuthStore } from "@/store/auth-store";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8000";
+
 
 export async function getRequest(endpoint: string) {
   const token = useAuthStore.getState().token || localStorage.getItem("auth_token");
@@ -34,6 +35,8 @@ export async function postRequest<T = unknown>(endpoint: string, body?: unknown)
     headers.Authorization = `Bearer ${token}`;
   }
 
+  
+
   const res = await fetch(`${API_BASE_URL}${endpoint}`, {
     method: "POST",
     headers,
@@ -47,7 +50,64 @@ export async function postRequest<T = unknown>(endpoint: string, body?: unknown)
       useAuthStore.getState().clearToken();
       localStorage.removeItem("auth_token");
     }
-    throw new Error(data.detail || "Request failed");
+    
+    let errorMessage = "Request failed";
+    if (data.detail) {
+      errorMessage = Array.isArray(data.detail) 
+        ? data.detail.map((err: { msg?: string; message?: string; }) => err.msg || err.message || err).join(", ")
+        : data.detail;
+    } else if (data.message) {
+      errorMessage = data.message;
+    } else if (data.error) {
+      errorMessage = data.error;
+    } else if (res.status === 422) {
+      errorMessage = "Validation error: Please check your input";
+    }
+    
+    throw new Error(errorMessage);
+  }
+
+  return data;
+}
+
+export async function putRequest<T = unknown>(endpoint: string, body?: unknown): Promise<T> {
+  const token = useAuthStore.getState().token || localStorage.getItem("auth_token");
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+  };
+  
+  if (token) {
+    headers.Authorization = `Bearer ${token}`;
+  }
+
+  const res = await fetch(`${API_BASE_URL}${endpoint}`, {
+    method: "PUT",
+    headers,
+    body: body ? JSON.stringify(body) : undefined,
+  });
+  
+  const data = await res.json();
+
+  if (!res.ok) {
+    if (res.status === 401) {
+      useAuthStore.getState().clearToken();
+      localStorage.removeItem("auth_token");
+    }
+    
+    let errorMessage = "Request failed";
+    if (data.detail) {
+      errorMessage = Array.isArray(data.detail) 
+        ? data.detail.map((err: { msg?: string; message?: string; }) => err.msg || err.message || err).join(", ")
+        : data.detail;
+    } else if (data.message) {
+      errorMessage = data.message;
+    } else if (data.error) {
+      errorMessage = data.error;
+    } else if (res.status === 422) {
+      errorMessage = "Validation error: Please check your input";
+    }
+    
+    throw new Error(errorMessage);
   }
 
   return data;
@@ -56,14 +116,7 @@ export async function postRequest<T = unknown>(endpoint: string, body?: unknown)
 export async function postFileRequest<T = unknown>(endpoint: string, file: File): Promise<T> {
   const token = useAuthStore.getState().token || localStorage.getItem("auth_token");
   
-  console.log("Upload attempt:", {
-    endpoint: `${API_BASE_URL}${endpoint}`,
-    fileName: file.name,
-    fileSize: file.size,
-    fileType: file.type,
-    hasToken: !!token,
-    tokenPrefix: token ? token.substring(0, 10) + "..." : "none"
-  });
+ 
   
   const formData = new FormData();
   formData.append("file", file);
@@ -77,7 +130,6 @@ export async function postFileRequest<T = unknown>(endpoint: string, file: File)
       body: formData,
     });
     
-    console.log("Response status:", res.status, res.statusText);
     
     if (!res.ok) {
       if (res.status === 401) {
@@ -90,11 +142,9 @@ export async function postFileRequest<T = unknown>(endpoint: string, file: File)
       
       try {
         const data = await res.json();
-        console.log("Error response data:", data);
         errorMessage = data.detail || data.message || `HTTP ${res.status}: ${res.statusText}`;
         errorDetails = data;
       } catch {
-        console.log("Failed to parse error response as JSON");
         errorMessage = `HTTP ${res.status}: ${res.statusText}`;
       }
       
@@ -105,11 +155,9 @@ export async function postFileRequest<T = unknown>(endpoint: string, file: File)
     }
     
     const data = await res.json();
-    console.log("Success response:", data);
     return data;
     
-  } catch (fetchError) {
-    console.error("Fetch error:", fetchError);
+  } catch (fetchError) {  
     if (fetchError instanceof Error && fetchError.message.includes("fetch")) {
       throw new Error("Network error: Unable to connect to server");
     }
@@ -119,14 +167,6 @@ export async function postFileRequest<T = unknown>(endpoint: string, file: File)
 
 export async function putFileRequest<T = unknown>(endpoint: string, file: File): Promise<T> {
   const token = useAuthStore.getState().token || localStorage.getItem("auth_token");
-  
-  console.log("Update attempt:", {
-    endpoint: `${API_BASE_URL}${endpoint}`,
-    fileName: file.name,
-    fileSize: file.size,
-    fileType: file.type,
-    hasToken: !!token
-  });
   
   const formData = new FormData();
   formData.append("file", file);
@@ -140,8 +180,6 @@ export async function putFileRequest<T = unknown>(endpoint: string, file: File):
       body: formData,
     });
     
-    console.log("Response status:", res.status, res.statusText);
-    
     if (!res.ok) {
       if (res.status === 401) {
         useAuthStore.getState().clearToken();
@@ -153,11 +191,9 @@ export async function putFileRequest<T = unknown>(endpoint: string, file: File):
       
       try {
         const data = await res.json();
-        console.log("Error response data:", data);
         errorMessage = data.detail || data.message || `HTTP ${res.status}: ${res.statusText}`;
         errorDetails = data;
       } catch {
-        console.log("Failed to parse error response as JSON");
         errorMessage = `HTTP ${res.status}: ${res.statusText}`;
       }
       
@@ -168,11 +204,9 @@ export async function putFileRequest<T = unknown>(endpoint: string, file: File):
     }
     
     const data = await res.json();
-    console.log("Success response:", data);
     return data;
     
   } catch (fetchError) {
-    console.error("Fetch error:", fetchError);
     if (fetchError instanceof Error && fetchError.message.includes("fetch")) {
       throw new Error("Network error: Unable to connect to server");
     }

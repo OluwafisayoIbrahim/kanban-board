@@ -27,6 +27,7 @@ import { LogOut as apiLogOut } from "@/app/api/auth";
 import { toast } from "sonner";
 import { usePathname, useRouter } from "next/navigation";
 import { ProfilePictureResponse } from "@/types/index";
+import Image from "next/image";
 
 
 
@@ -80,9 +81,11 @@ const MobileProfileMenu: FC = () => {
         <DropdownMenuTrigger asChild>
           <button className="w-10 h-10 rounded-[8px] overflow-hidden">
             {profile?.profile_picture_url ? (
-              <img
+              <Image
                 src={profile.profile_picture_url}
                 alt="Avatar"
+                width={40}
+                height={40}
                 className="w-full h-full object-cover rounded-[8px]"
               />
             ) : (
@@ -100,9 +103,11 @@ const MobileProfileMenu: FC = () => {
           <div className="p-4 border-b">
             <div className="flex flex-col items-center space-y-1">
               {profile?.profile_picture_url ? (
-                <img
+                <Image
                   src={profile.profile_picture_url}
                   alt="Avatar"
+                  width={40}
+                  height={40}
                   className="w-10 h-10 rounded-xl object-cover"
                 />
               ) : (

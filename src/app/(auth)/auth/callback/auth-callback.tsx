@@ -24,11 +24,11 @@ export default function AuthCallback() {
     } else {
       router.push("/signin?error=missing_token");
     }
-  }, [token]);
+  }, [token, router, setToken]);
 
   const {
     data: user,
-    error,
+    error: userError,
     isSuccess,
   } = useQuery({
     queryKey: ["user"],
@@ -42,10 +42,10 @@ export default function AuthCallback() {
       setUser(user.data);
       router.push("/dashboard");
     }
-  }, [isSuccess, user]);
+  }, [isSuccess, user, router, setUser]);
 
-  if (error) {
-    console.error("Auth failed:", error);
+  if (userError) {
+    console.error("Auth failed:", userError);
     router.push("/signin?error=auth_failed");
     return null;
   }

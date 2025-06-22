@@ -3,7 +3,7 @@ import { FC } from "react";
 import Logo from "../../../components/Logo";
 import LogoMobile from "../../../components/LogoMobile";
 import SearchBar from "./SearchBar";
-import Notifications from "./Notifications";
+import { Notifications } from "./Notifications";
 import ProfilePictureComponent from "./ProfilePicture";
 import MobileProfileMenu from "./MobileProfilePicture";
 

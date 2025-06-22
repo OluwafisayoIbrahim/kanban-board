@@ -32,8 +32,7 @@ export function useLogout() {
       toast.success(getRandomMessage(LOGGED_OUT_MESSAGES));
       router.push("/");
     },
-    onError: (error: unknown) => {
-      console.error("Logout error:", error);
+    onError: () => {
       toast.error("Logout failed. Please try again.");
     },
   });

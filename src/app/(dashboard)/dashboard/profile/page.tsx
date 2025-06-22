@@ -10,6 +10,9 @@ import {
   deleteProfilePicture,
 } from "@/app/api/profile";
 import { ProfilePictureResponse } from "@/types/index";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import Image from "next/image";
 
 const Profile: FC = () => {
   const [isUploading, setIsUploading] = useState(false);
@@ -142,7 +145,7 @@ const Profile: FC = () => {
 
   if (isLoadingProfile) {
     return (
-      <div className="flex items-center justify-center w-32 h-32 bg-gray-100 rounded-full">
+      <div className="flex items-center justify-center w- 32 h-32 bg-gray-100 rounded-full">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
       </div>
     );
@@ -151,15 +154,14 @@ const Profile: FC = () => {
   const currentImageUrl = previewUrl || profileData?.profile_picture_url;
 
   return (
-    <div className="flex flex-col items-center space-y-4">
+    <><div className="flex flex-col items-center space-y-4">
       <div className="relative group">
         <div className="w-32 h-32 rounded-full overflow-hidden bg-gray-100 border-4 border-white shadow-lg">
           {currentImageUrl ? (
-            <img
+            <Image
               src={currentImageUrl}
               alt="Profile"
-              className="w-full h-full object-cover"
-            />
+              className="w-full h-full object-cover" />
           ) : (
             <div className="w-full h-full flex items-center justify-center bg-gray-200">
               <User className="w-12 h-12 text-gray-400" />
@@ -231,8 +233,7 @@ const Profile: FC = () => {
         type="file"
         accept="image/*"
         onChange={handleFileSelect}
-        className="hidden"
-      />
+        className="hidden" />
 
       {deleteMutation.isPending && (
         <p className="text-sm text-gray-600">Deleting profile picture...</p>
@@ -243,7 +244,11 @@ const Profile: FC = () => {
           Failed to load profile picture
         </p>
       )}
-    </div>
+    </div><Link href="/dashboard/profile/friends">
+        <Button className="bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+          <span>Friends</span>
+        </Button>
+      </Link></>
   );
 };
 

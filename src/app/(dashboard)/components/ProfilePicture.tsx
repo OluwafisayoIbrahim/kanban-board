@@ -18,6 +18,7 @@ import { useAuthStore } from "@/store/auth-store";
 import { LogOut as apiLogOut } from "@/app/api/auth";
 import { toast } from "sonner";
 import { ProfilePictureResponse } from "@/types/index";  
+import Image from "next/image";
 
 const ProfilePicture: FC = () => {
   const pathname = usePathname();
@@ -60,7 +61,6 @@ const ProfilePicture: FC = () => {
 
   const handleLogout = async () => {
     setIsDropdownOpen(false);
-    console.log("Logging out...");
     try {
       await apiLogOut();
       clearToken();
@@ -68,8 +68,7 @@ const ProfilePicture: FC = () => {
       router.push("/");
       window.location.href = "/";
       toast.success("You have been signed out of your account");
-    } catch (error) {
-      console.error("Logout failed", error);
+    } catch {
       toast.error("Logout failed");
     }
   };
@@ -108,9 +107,11 @@ const ProfilePicture: FC = () => {
       >
         <div className="w-[98px] h-[98px] rounded-xl overflow-hidden">
           {profileData?.profile_picture_url ? (
-            <img
+            <Image
               src={profileData.profile_picture_url}
               alt="Profile"
+              width={98}
+              height={98}
               className="w-full h-full object-cover"
             />
           ) : (
@@ -127,9 +128,11 @@ const ProfilePicture: FC = () => {
             <div className="flex flex-col items-center space-y-2">
               <div className="w-12 h-12 rounded-full overflow-hidden">
                 {profileData?.profile_picture_url ? (
-                  <img
+                  <Image
                     src={profileData.profile_picture_url}
                     alt="Profile"
+                    width={48}
+                    height={48}
                     className="w-full h-full object-cover"
                   />
                 ) : (
@@ -178,3 +181,4 @@ const ProfilePicture: FC = () => {
 };
 
 export default ProfilePicture;
+
