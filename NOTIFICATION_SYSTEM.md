@@ -47,15 +47,14 @@ The backend now provides robust timestamp formatting:
 def get_relative_time(dt: datetime) -> str:
     """Convert datetime to relative time string (e.g., 'now', '1m', '2h', '3d')"""
     try:
-        # Handle timezone-aware and timezone-naive datetime objects
+
         if dt.tzinfo is None:
-            # If datetime is naive, assume it's UTC
+
             dt = dt.replace(tzinfo=dt.timezone.utc)
         
         now = datetime.now(dt.timezone.utc)
         diff = now - dt
         
-        # Handle future dates gracefully
         if diff.total_seconds() < 0:
             return "now"
         
