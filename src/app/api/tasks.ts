@@ -4,13 +4,14 @@ import { Task } from "@/types/index";
 // Types for task operations
 interface TaskCreate {
   title: string;
-  description: string;
+  description?: string;
   status: string;
-  priority: 'Normal' | 'Warning' | 'Urgent';
+  priority: string;
   board_id: string;
   assignee_id?: string;
   due_date: string;
   position?: number;
+  tags?: string[];
 }
 
 interface TaskUpdate {

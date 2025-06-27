@@ -71,25 +71,23 @@ export interface NotificationSettings {
 export interface Task {
   id: string;
   title: string;
-  description: string;
-  assignee: string;
-  dueDate: string;
-  priority: 'Normal' | 'Warning' | 'Urgent';
-  status: 'To Do' | 'In Progress' | 'Review' | 'Done';
-  tags: string[];
-  createdAt: string;
+  description?: string;
+  status: string;
+  priority: string;
+  board_id: string;
+  creator_id: string;
+  due_date?: string; // ISO string format
+  position: number;
+  created_at: string; // ISO string format
+  updated_at: string; // ISO string format
+  assignees?: any[]; // List of assignee objects
+  tags?: string[];
 }
 
 export interface ProfileData {
   profile_picture_url: string | null;
   username: string;
   email: string;
-}
-
-export interface Task {
-  id: string;
-  title: string;
-  priority: priority;
 }
 
 export interface SearchProps {
