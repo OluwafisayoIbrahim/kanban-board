@@ -2,68 +2,154 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, Calendar, User, AlertTriangle, Tag, FileText, Clock, Sparkles } from 'lucide-react';
 import { 
-  AlertDialog, 
-  AlertDialogContent, 
-  AlertDialogHeader, 
-  AlertDialogTitle, 
-  AlertDialogTrigger 
-} from '@/components/ui/alert-dialog';
+  Dialog, 
+  DialogContent, 
+  DialogHeader, 
+  DialogTitle, 
+  DialogTrigger 
+} from '@/components/ui/dialog';
 import { Task } from '@/types/index';
 
-const DashboardPage = () => {
-  const [tasks, setTasks] = useState<Task[]>([]);
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [formData, setFormData] = useState({
-    title: '',
-    description: '',
-    assignee: '',
-    dueDate: '',
-    priority: 'Medium' as Task['priority'],
-    tags: ''
-  });
-
-  useEffect(() => {
-    const savedTasks = localStorage.getItem('kanban-tasks');
-    if (savedTasks) {
-      setTasks(JSON.parse(savedTasks));
-    }
-  }, []);
-
-  useEffect(() => {
-    localStorage.setItem('kanban-tasks', JSON.stringify(tasks));
-  }, [tasks]);
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-  };
-
-  const handleSubmit = () => {
-    if (!formData.title || !formData.assignee || !formData.dueDate) {
-      alert('Please fill in all required fields');
-      return;
-    }
+// TaskFormDialog component moved outside to prevent re-rendering issues
+const TaskFormDialog = ({ 
+  formData, 
+  handleInputChange, 
+  handleSubmit,
+  setIsDialogOpen
+}: { 
+  formData: any; 
+  handleInputChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => void; 
+  handleSubmit: () => void; 
+  setIsDialogOpen: (open: boolean) => void;
+}) => (
+  <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto" showCloseButton={false}>
+    <DialogHeader>
+      <DialogTitle className="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+        Create New Task
+      </DialogTitle>
+    </DialogHeader>
     
-    const newTask: Task = {
-      id: Date.now().toString(),
-      ...formData,
-      status: 'To Do',
-      tags: formData.tags.split(',').map(tag => tag.trim()).filter(Boolean),
-      createdAt: new Date().toISOString()
-    };
+    <div className="space-y-6 mt-6">
+      <div className="grid grid-cols-1 gap-6">
+        <div className="space-y-2">
+          <label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+            <FileText className="w-4 h-4" />
+            Task Title *
+          </label>
+          <input
+            type="text"
+            name="title"
+            value={formData.title}
+            onChange={handleInputChange}
+            className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200"
+            placeholder="Enter task title..."
+          />
+        </div>
 
-    setTasks(prev => [...prev, newTask]);
-    setFormData({
-      title: '',
-      description: '',
-      assignee: '',
-      dueDate: '',
-      priority: 'Warning',
-      tags: ''
-    });
-    setIsDialogOpen(false);
-  };
+        <div className="space-y-2">
+          <label className="text-sm font-semibold text-gray-700">Description</label>
+          <textarea
+            name="description"
+            value={formData.description}
+            onChange={handleInputChange}
+            rows={4}
+            className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 resize-none"
+            placeholder="Describe the task in detail..."
+          />
+        </div>
 
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+              <User className="w-4 h-4" />
+              Assignee *
+            </label>
+            <input
+              type="text"
+              name="assignee"
+              value={formData.assignee}
+              onChange={handleInputChange}
+              className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200"
+              placeholder="Enter assignee name..."
+            />
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+              <Calendar className="w-4 h-4" />
+              Due Date *
+            </label>
+            <input
+              type="date"
+              name="dueDate"
+              value={formData.dueDate}
+              onChange={handleInputChange}
+              className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200"
+            />
+          </div>
+        </div>
+
+        {/* Priority and Tags Row */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+              <AlertTriangle className="w-4 h-4" />
+              Priority
+            </label>
+            <select
+              name="priority"
+              value={formData.priority}
+              onChange={handleInputChange}
+              className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200"
+            >
+              <option value="Normal">Normal</option>
+              <option value="Warning">Warning</option>
+              <option value="Urgent">Urgent</option>
+            </select>
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+              <Tag className="w-4 h-4" />
+              Tags
+            </label>
+            <input
+              type="text"
+              name="tags"
+              value={formData.tags}
+              onChange={handleInputChange}
+              className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200"
+              placeholder="UI, Design, Frontend (comma separated)"
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Submit Button */}
+      <div className="flex justify-end gap-3 pt-4 border-t">
+        <button
+          type="button"
+          onClick={() => setIsDialogOpen(false)}
+          className="px-6 py-3 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg font-medium transition-colors duration-200"
+        >
+          Cancel
+        </button>
+        <button
+          onClick={handleSubmit}
+          className="px-8 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white rounded-lg font-semibold transition-all duration-200 transform hover:scale-105 shadow-lg"
+        >
+          Create Task
+        </button>
+      </div>
+    </div>
+  </DialogContent>
+);
+
+interface KanbanBoardProps {
+  tasks: Task[];
+}
+
+const KanbanBoard = ({ tasks }: KanbanBoardProps) => {
   const getPriorityColor = (priority: Task['priority']) => {
     switch (priority) {
       case 'Normal': return 'bg-green-100 text-green-800 border-green-200';
@@ -110,142 +196,8 @@ const DashboardPage = () => {
         </p>
       </div>
 
-      <AlertDialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <AlertDialogTrigger asChild>
-          <button className="group relative inline-flex items-center gap-3 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white px-8 py-4 rounded-xl font-semibold transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl">
-            <Plus className="w-5 h-5 group-hover:rotate-90 transition-transform duration-300" />
-            Create Your First Task
-            <div className="absolute inset-0 bg-white/20 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-          </button>
-        </AlertDialogTrigger>
-        <TaskFormDialog />
-      </AlertDialog>
+      {/* The Dialog is now managed at the page level. Only render the trigger button here if needed. */}
     </div>
-  );
-
-  const TaskFormDialog = () => (
-    <AlertDialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
-      <AlertDialogHeader>
-        <AlertDialogTitle className="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
-          Create New Task
-        </AlertDialogTitle>
-      </AlertDialogHeader>
-      
-      <div className="space-y-6 mt-6">
-        <div className="grid grid-cols-1 gap-6">
-          <div className="space-y-2">
-            <label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
-              <FileText className="w-4 h-4" />
-              Task Title *
-            </label>
-            <input
-              type="text"
-              name="title"
-              value={formData.title}
-              onChange={handleInputChange}
-              className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200"
-              placeholder="Enter task title..."
-            />
-          </div>
-
-          <div className="space-y-2">
-            <label className="text-sm font-semibold text-gray-700">Description</label>
-            <textarea
-              name="description"
-              value={formData.description}
-              onChange={handleInputChange}
-              rows={4}
-              className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 resize-none"
-              placeholder="Describe the task in detail..."
-            />
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
-                <User className="w-4 h-4" />
-                Assignee *
-              </label>
-              <input
-                type="text"
-                name="assignee"
-                value={formData.assignee}
-                onChange={handleInputChange}
-                className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200"
-                placeholder="Enter assignee name..."
-              />
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
-                <Calendar className="w-4 h-4" />
-                Due Date *
-              </label>
-              <input
-                type="date"
-                name="dueDate"
-                value={formData.dueDate}
-                onChange={handleInputChange}
-                className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200"
-              />
-            </div>
-          </div>
-
-          {/* Priority and Tags Row */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
-                <AlertTriangle className="w-4 h-4" />
-                Priority
-              </label>
-              <select
-                name="priority"
-                value={formData.priority}
-                onChange={handleInputChange}
-                className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200"
-              >
-                <option value="Low">Low</option>
-                <option value="Medium">Medium</option>
-                <option value="High">High</option>
-                <option value="Urgent">Urgent</option>
-              </select>
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
-                <Tag className="w-4 h-4" />
-                Tags
-              </label>
-              <input
-                type="text"
-                name="tags"
-                value={formData.tags}
-                onChange={handleInputChange}
-                className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200"
-                placeholder="UI, Design, Frontend (comma separated)"
-              />
-            </div>
-          </div>
-        </div>
-
-        {/* Submit Button */}
-        <div className="flex justify-end gap-3 pt-4 border-t">
-          <button
-            type="button"
-            onClick={() => setIsDialogOpen(false)}
-            className="px-6 py-3 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg font-medium transition-colors duration-200"
-          >
-            Cancel
-          </button>
-          <button
-            onClick={handleSubmit}
-            className="px-8 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white rounded-lg font-semibold transition-all duration-200 transform hover:scale-105 shadow-lg"
-          >
-            Create Task
-          </button>
-        </div>
-      </div>
-    </AlertDialogContent>
   );
 
   // Task card component
@@ -313,17 +265,8 @@ const DashboardPage = () => {
               </p>
             </div>
             
-            {tasks.length > 0 && (
-              <AlertDialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-                <AlertDialogTrigger asChild>
-                  <button className="inline-flex items-center gap-2 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white px-6 py-3 rounded-lg font-semibold transition-all duration-200 transform hover:scale-105 shadow-lg">
-                    <Plus className="w-5 h-5" />
-                    New Task
-                  </button>
-                </AlertDialogTrigger>
-                <TaskFormDialog />
-              </AlertDialog>
-            )}
+            {/* The Dialog is now managed at the page level. Only render the trigger button here if needed. */}
+            {/* You can add a button here to open the dialog if you want multiple entry points. */}
           </div>
 
           {/* Stats Cards */}
@@ -366,4 +309,4 @@ const DashboardPage = () => {
   );
 };
 
-export default DashboardPage;
+export default KanbanBoard;
