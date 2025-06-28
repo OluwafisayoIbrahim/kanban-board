@@ -3,7 +3,7 @@ import { JSX, useState, useEffect } from "react";
 import Header from "../components/Header";
 import Footer from "@/components/Footer";
 import KanbanBoard from "../components/DashboardContent";
-import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -32,10 +32,8 @@ export default function DashboardPage(): JSX.Element {
   });
   const [tasks, setTasks] = useState<Task[]>([]);
 
-  // Set board ID to user ID (this will be the board ID)
   useEffect(() => {
     if (user?.id) {
-      // Check if we have a stored board ID for this user
       const storedBoardId = localStorage.getItem(`board_id_${user.id}`);
       if (storedBoardId) {
         setBoardId(storedBoardId);
@@ -45,20 +43,13 @@ export default function DashboardPage(): JSX.Element {
     }
   }, [user?.id]);
 
-  // Debug: Log the boardId and user info
-  useEffect(() => {
-    console.log('Current user:', user);
-    console.log('Board ID:', boardId);
-  }, [user, boardId]);
 
-  // Store board ID in localStorage when it changes
   useEffect(() => {
     if (boardId && user?.id) {
       localStorage.setItem(`board_id_${user.id}`, boardId);
     }
   }, [boardId, user?.id]);
 
-  // Fetch tasks on component mount
   useEffect(() => {
     const fetchTasks = async () => {
       if (!boardId) return;
@@ -66,12 +57,10 @@ export default function DashboardPage(): JSX.Element {
       try {
         setIsLoading(true);
         setError(null);
-        console.log('Fetching tasks for board:', boardId);
         const fetchedTasks = await getBoardTasks(boardId);
         setTasks(fetchedTasks);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to fetch tasks');
-        console.error('Error fetching tasks:', err);
       } finally {
         setIsLoading(false);
       }
@@ -80,15 +69,14 @@ export default function DashboardPage(): JSX.Element {
     fetchTasks();
   }, [boardId]);
 
-  // Fetch friends for assignee dropdown
   useEffect(() => {
     const fetchFriends = async () => {
       try {
         setIsLoadingFriends(true);
         const fetchedFriends = await getFriends();
         setFriends(fetchedFriends);
-      } catch (err) {
-        console.error('Error fetching friends:', err);
+      } catch {
+        // error handled
       } finally {
         setIsLoadingFriends(false);
       }
@@ -108,7 +96,6 @@ export default function DashboardPage(): JSX.Element {
       return;
     }
 
-    // Convert tags string to array, trimming whitespace and removing empty tags
     const tagsArray = formData.tags
       .split(',')
       .map(tag => tag.trim())
@@ -130,7 +117,6 @@ export default function DashboardPage(): JSX.Element {
       const newTask = await createTask(taskData);
       
       if (newTask.board_id && newTask.board_id !== boardId) { 
-        console.log('Updating board ID from', boardId, 'to', newTask.board_id);
         setBoardId(newTask.board_id);
       }
       
@@ -148,7 +134,6 @@ export default function DashboardPage(): JSX.Element {
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to create task';
       alert(errorMessage);
-      console.error('Error creating task:', err);
     }
   };
 
@@ -158,21 +143,19 @@ export default function DashboardPage(): JSX.Element {
     try {
       await deleteTask(taskId);
       setTasks(prev => prev.filter(task => task.id !== taskId));
-    } catch (err) {
+    } catch {
       alert('Failed to delete task');
-      console.error('Error deleting task:', err);
     }
   };
 
-  const handleUpdateTask = async (taskId: string, updates: any) => {
+  const handleUpdateTask = async (taskId: string, updates: { title?: string; description?: string; status?: string; priority?: 'Normal' | 'Warning' | 'Urgent'; due_date?: string; position?: number }) => {
     try {
       const updatedTask = await updateTask(taskId, updates);
       setTasks(prev => prev.map(task => 
         task.id === taskId ? updatedTask : task
       ));
-    } catch (err) {
+    } catch {
       alert('Failed to update task');
-      console.error('Error updating task:', err);
     }
   };
 

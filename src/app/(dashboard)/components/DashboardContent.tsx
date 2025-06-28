@@ -3,13 +3,9 @@ import React from 'react';
 import { Plus, Calendar, Tag, Clock, Sparkles, Trash2, ChevronDown, BarChart3, CheckCircle, AlertCircle, Target } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Task } from '@/types/index';
+import { KanbanBoardProps } from '@/types/index';
 
-interface KanbanBoardProps {
-  tasks: Task[];
-  onDeleteTask?: (taskId: string) => void;
-  onUpdateTask?: (taskId: string, updates: any) => void;
-  onCreateTask?: () => void;
-}
+
 
 const KanbanBoard = ({ tasks, onDeleteTask, onUpdateTask, onCreateTask }: KanbanBoardProps) => {
   const getPriorityColor = (priority: string) => {
@@ -41,7 +37,6 @@ const KanbanBoard = ({ tasks, onDeleteTask, onUpdateTask, onCreateTask }: Kanban
     });
   };
 
-  // Empty state component
   const EmptyState = () => (
     <div className="flex flex-col items-center justify-center min-h-[400px] text-center space-y-6 bg-gradient-to-br from-indigo-50 to-white rounded-2xl border border-indigo-100 p-12">
       <div className="relative">
@@ -72,15 +67,13 @@ const KanbanBoard = ({ tasks, onDeleteTask, onUpdateTask, onCreateTask }: Kanban
     </div>
   );
 
-  // Task card component
   const TaskCard = ({ task, onDelete, onUpdate }: { 
     task: Task; 
     onDelete?: (taskId: string) => void;
-    onUpdate?: (taskId: string, updates: any) => void;
+    onUpdate?: (taskId: string, updates: { title?: string; description?: string; status?: string; priority?: 'Normal' | 'Warning' | 'Urgent'; due_date?: string; position?: number }) => void;
   }) => (
     <div className="bg-white rounded-xl border border-gray-200 p-6 hover:shadow-lg transition-all duration-300 group">
       <div className="space-y-4">
-        {/* Header */}
         <div className="flex items-start justify-between">
           <h3 className="font-semibold text-gray-900 group-hover:text-indigo-600 transition-colors duration-200 line-clamp-2">
             {task.title}
@@ -103,12 +96,10 @@ const KanbanBoard = ({ tasks, onDeleteTask, onUpdateTask, onCreateTask }: Kanban
           </div>
         </div>
 
-        {/* Description */}
         {task.description && (
           <p className="text-gray-600 text-sm line-clamp-3">{task.description}</p>
         )}
 
-        {/* Tags */}
         {Array.isArray(task.tags) && task.tags.length > 0 && (
           <div className="flex flex-wrap gap-2">
             {task.tags.map((tag, index) => (
@@ -120,7 +111,6 @@ const KanbanBoard = ({ tasks, onDeleteTask, onUpdateTask, onCreateTask }: Kanban
           </div>
         )}
 
-        {/* Footer */}
         <div className="flex items-center justify-between pt-4 border-t border-gray-100">
           <div className="flex items-center gap-2 text-sm text-gray-600">
             <Calendar className="w-4 h-4" />
@@ -198,7 +188,6 @@ const KanbanBoard = ({ tasks, onDeleteTask, onUpdateTask, onCreateTask }: Kanban
             </div>
           )}
 
-          {/* Main Content */}
           {tasks.length === 0 ? (
             <EmptyState />
           ) : (

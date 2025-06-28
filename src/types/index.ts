@@ -76,11 +76,16 @@ export interface Task {
   priority: string;
   board_id: string;
   creator_id: string;
-  due_date?: string; // ISO string format
+  due_date?: string; 
   position: number;
-  created_at: string; // ISO string format
-  updated_at: string; // ISO string format
-  assignees?: any[]; // List of assignee objects
+  created_at: string;
+  updated_at: string;
+  assignees?: Array<{
+    id: string;
+    name?: string;
+    username?: string;
+    email: string;
+  }>;
   tags?: string[];
 }
 
@@ -216,4 +221,11 @@ export interface AllRequestsResponse {
 export interface FriendRequestCreate {
   username?: string;
   email?: string;
+}
+
+export interface KanbanBoardProps {
+  tasks: Task[];
+  onDeleteTask?: (taskId: string) => void;
+  onUpdateTask?: (taskId: string, updates: { title?: string; description?: string; status?: string; priority?: 'Normal' | 'Warning' | 'Urgent'; due_date?: string; position?: number }) => void;
+  onCreateTask?: () => void;
 }

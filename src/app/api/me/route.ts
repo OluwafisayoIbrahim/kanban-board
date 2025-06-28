@@ -21,8 +21,7 @@ export async function GET(request: Request) {
     const data = await backendRes.json();
     return NextResponse.json(data, { status: 200 });
     
-  } catch (err) {
-    console.error("[/api/me proxy] network or code error:", err);
+  } catch {
     return NextResponse.json(
       { 
         error: "Internal proxy error", 

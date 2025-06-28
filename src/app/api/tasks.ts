@@ -1,7 +1,6 @@
 import { getRequest, postRequest, putRequest, deleteRequest } from "@/lib/api";
 import { Task } from "@/types/index";
 
-// Types for task operations
 interface TaskCreate {
   title: string;
   description?: string;
@@ -33,7 +32,6 @@ interface MoveTaskData {
   position?: number;
 }
 
-// Get all tasks for a specific board
 export const getBoardTasks = async (boardId: string): Promise<Task[]> => {
   try {
     const response = await getRequest(`/api/tasks/board/${boardId}`);
@@ -52,7 +50,6 @@ export const getBoardTasks = async (boardId: string): Promise<Task[]> => {
   }
 };
 
-// Get a specific task by ID
 export const getTaskById = async (taskId: string): Promise<Task | null> => {
   try {
     const response = await getRequest(`/api/tasks/${taskId}`);
@@ -62,12 +59,8 @@ export const getTaskById = async (taskId: string): Promise<Task | null> => {
   }
 };
 
-// Create a new task
 export const createTask = async (taskData: TaskCreate): Promise<Task> => {
   try {
-    // Note: Backend should auto-create a board for the user if it doesn't exist
-    // The board_id should be the user's ID, and if no board exists with that ID,
-    // the backend should create one automatically
     const response = await postRequest('/api/tasks/', taskData);
     return response as Task;
   } catch {
@@ -75,7 +68,6 @@ export const createTask = async (taskData: TaskCreate): Promise<Task> => {
   }
 };
 
-// Update a task
 export const updateTask = async (taskId: string, taskData: TaskUpdate): Promise<Task> => {
   try {
     const response = await putRequest(`/api/tasks/${taskId}`, taskData);
@@ -85,7 +77,6 @@ export const updateTask = async (taskId: string, taskData: TaskUpdate): Promise<
   }
 };
 
-// Delete a task
 export const deleteTask = async (taskId: string): Promise<{ message: string; status: string }> => {
   try {
     const response = await deleteRequest(`/api/tasks/${taskId}`);
@@ -95,7 +86,6 @@ export const deleteTask = async (taskId: string): Promise<{ message: string; sta
   }
 };
 
-// Assign a user to a task
 export const assignUserToTask = async (taskId: string, assigneeData: TaskAssignee): Promise<{ message: string; task_id: string; user_id: string; role: string; status: string }> => {
   try {
     const response = await postRequest(`/api/tasks/${taskId}/assignees`, assigneeData);
@@ -105,7 +95,6 @@ export const assignUserToTask = async (taskId: string, assigneeData: TaskAssigne
   }
 };
 
-// Remove a user from a task
 export const removeUserFromTask = async (taskId: string, userId: string): Promise<{ message: string; task_id: string; user_id: string; status: string }> => {
   try {
     const response = await deleteRequest(`/api/tasks/${taskId}/assignees/${userId}`);
@@ -115,8 +104,18 @@ export const removeUserFromTask = async (taskId: string, userId: string): Promis
   }
 };
 
-// Get all assignees for a task
-export const getTaskAssignees = async (taskId: string): Promise<any[]> => {
+export const getTaskAssignees = async (taskId: string): Promise<Array<{
+  id: string;
+  user_id: string;
+  task_id: string;
+  role: string;
+  created_at: string;
+  user?: {
+    id: string;
+    username?: string;
+    email: string;
+  };
+}>> => {
   try {
     const response = await getRequest(`/api/tasks/${taskId}/assignees`);
     
@@ -134,7 +133,6 @@ export const getTaskAssignees = async (taskId: string): Promise<any[]> => {
   }
 };
 
-// Move task to different status/position
 export const moveTask = async (taskId: string, moveData: MoveTaskData): Promise<{ message: string; task: Task; status: string }> => {
   try {
     const response = await postRequest(`/api/tasks/${taskId}/move`, moveData);

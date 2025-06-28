@@ -58,8 +58,6 @@ const Profile: FC = () => {
         const errorObj = error as Record<string, unknown>;
         errorMessage = (errorObj.detail as string) || (errorObj.message as string) || (errorObj.error as string) || "Unknown error occurred";
       }
-      
-      console.error("Upload error:", error);
       toast.error(errorMessage);
       setPreviewUrl(null);
       setIsUploading(false);
@@ -87,7 +85,6 @@ const Profile: FC = () => {
         errorMessage = (errorObj.detail as string) || (errorObj.message as string) || (errorObj.error as string) || "Unknown error occurred";
       }
       
-      console.error("Delete error:", error);
       toast.error(errorMessage);
     },
   });
