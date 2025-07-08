@@ -7,12 +7,18 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Plus, X, Calendar, User, AlertTriangle, Tag, FileText } from 'lucide-react';
+import { Plus, X, User, AlertTriangle, Tag, FileText, CalendarIcon } from 'lucide-react';
 import { getBoardTasks, createTask, deleteTask, updateTask } from "@/app/api/tasks";
 import { getFriends } from "@/app/api/friends";
 import { Task } from "@/types/index";
 import { FriendResponse } from "@/types/index";
 import { useAuthStore } from "@/store/auth-store";
+import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
+import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
+import { Calendar } from '@/components/ui/calendar';
+import { format } from 'date-fns';
+import { cn } from '@/lib/utils';
 
 export default function DashboardPage(): JSX.Element {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -28,7 +34,8 @@ export default function DashboardPage(): JSX.Element {
     assignee_id: '',
     dueDate: '',
     priority: 'Normal',
-    tags: ''
+    tags: '',
+    due_date: ''
   });
   const [tasks, setTasks] = useState<Task[]>([]);
 
@@ -90,8 +97,21 @@ export default function DashboardPage(): JSX.Element {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
+  // Add these handlers for Select value changes
+  const handleAssigneeChange = (value: string) => {
+    setFormData(prev => ({ ...prev, assignee_id: value }));
+  };
+  const handlePriorityChange = (value: string) => {
+    setFormData(prev => ({ ...prev, priority: value as 'Normal' | 'Warning' | 'Urgent' }));
+  };
+
+  // Add handler for due date
+  const handleDueDateChange = (date: Date | undefined) => {
+    setFormData(prev => ({ ...prev, due_date: date ? date.toISOString() : '' }));
+  };
+
   const handleSubmit = async () => {
-    if (!formData.title || !formData.dueDate) {
+    if (!formData.title || !formData.due_date) {
       alert('Please fill in all required fields');
       return;
     }
@@ -108,7 +128,7 @@ export default function DashboardPage(): JSX.Element {
         status: 'todo',
         priority: formData.priority.toLowerCase(),
         board_id: boardId,
-        due_date: new Date(formData.dueDate).toISOString(),
+        due_date: new Date(formData.due_date).toISOString(),
         position: tasks.length + 1,
         tags: tagsArray,
         ...(formData.assignee_id && { assignee_id: formData.assignee_id })
@@ -128,7 +148,8 @@ export default function DashboardPage(): JSX.Element {
         assignee_id: '',
         dueDate: '',
         priority: 'Normal',
-        tags: ''
+        tags: '',
+        due_date: ''
       });
       setIsDialogOpen(false);
     } catch (err) {
@@ -163,7 +184,7 @@ export default function DashboardPage(): JSX.Element {
     setIsDialogOpen(true);
   };
 
-  return (
+    return (
     <div className="min-h-screen flex flex-col">
       <Header />
       <main className="flex-1">
@@ -202,13 +223,12 @@ export default function DashboardPage(): JSX.Element {
                     <FileText className="w-4 h-4" />
                     Description
                   </Label>
-                  <textarea
+                  <Textarea
                     id="description"
                     name="description"
                     value={formData.description}
                     onChange={handleInputChange}
                     rows={4}
-                    className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 resize-none"
                     placeholder="Describe the task in detail..."
                   />
                 </div>
@@ -218,38 +238,51 @@ export default function DashboardPage(): JSX.Element {
                       <User className="w-4 h-4" />
                       Assignee (Optional)
                     </Label>
-                    <select
-                      id="assignee"
-                      name="assignee_id"
-                      value={formData.assignee_id}
-                      onChange={handleInputChange}
-                      className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200"
-                    >
-                      <option value="">Select a friend...</option>
-                      {isLoadingFriends ? (
-                        <option value="" disabled>Loading friends...</option>
-                      ) : (
-                        friends.map((friend) => (
-                          <option key={friend.friend.id} value={friend.friend.id}>
-                            {friend.friend.username || friend.friend.email}
-                          </option>
-                        ))
-                      )}
-                    </select>
+                    <Select value={formData.assignee_id} onValueChange={handleAssigneeChange}>
+                      <SelectTrigger id="assignee" name="assignee_id">
+                        <SelectValue placeholder="Select a friend..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {isLoadingFriends ? (
+                          <SelectItem value="loading" disabled>Loading friends...</SelectItem>
+                        ) : (
+                          friends.map((friend) => (
+                            <SelectItem key={friend.friend.id} value={friend.friend.id}>
+                              {friend.friend.username || friend.friend.email}
+                            </SelectItem>
+                          ))
+                        )}
+                      </SelectContent>
+                    </Select>
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="dueDate" className="text-sm font-semibold text-gray-700 flex items-center gap-2">
-                      <Calendar className="w-4 h-4" />
-                      Due Date *
+                    <Label htmlFor="due_date" className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+                      <CalendarIcon className="w-4 h-4" />
+                      Due Date
                     </Label>
-                    <Input
-                      id="dueDate"
-                      type="date"
-                      name="dueDate"
-                      value={formData.dueDate}
-                      onChange={handleInputChange}
-                      className="w-full"
-                    />
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          className={cn(
+                            "w-full justify-start text-left font-normal",
+                            !formData.due_date && "text-muted-foreground"
+                          )}
+                        >
+                          {formData.due_date
+                            ? format(new Date(formData.due_date), "PPP")
+                            : "Pick a date"}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={formData.due_date ? new Date(formData.due_date) : undefined}
+                          onSelect={handleDueDateChange}
+                          initialFocus
+                        />
+                      </PopoverContent>
+                    </Popover>
                   </div>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -258,17 +291,16 @@ export default function DashboardPage(): JSX.Element {
                       <AlertTriangle className="w-4 h-4" />
                       Priority
                     </Label>
-                    <select
-                      id="priority"
-                      name="priority"
-                      value={formData.priority}
-                      onChange={handleInputChange}
-                      className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200"
-                    >
-                      <option value="Normal">Normal</option>
-                      <option value="Warning">Warning</option>
-                      <option value="Urgent">Urgent</option>
-                    </select>
+                    <Select value={formData.priority} onValueChange={handlePriorityChange}>
+                      <SelectTrigger id="priority" name="priority">
+                        <SelectValue placeholder="Select priority" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Normal">Normal</SelectItem>
+                        <SelectItem value="Warning">Warning</SelectItem>
+                        <SelectItem value="Urgent">Urgent</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="tags" className="text-sm font-semibold text-gray-700 flex items-center gap-2">
@@ -324,5 +356,5 @@ export default function DashboardPage(): JSX.Element {
       </main>
       <Footer />
     </div>
-  );
+    );
 }

@@ -13,6 +13,9 @@ import { useFriendRequestActions } from '@/components/FriendRequestActions';
 
 import { User, FriendResponse, SearchResponse, PendingRequestResponse } from '@/types';
 import Image from 'next/image';
+import { Button } from "@/components/ui/button";
+import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@/components/ui/card';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 
 const FriendsPage = () => {
   const [activeTab, setActiveTab] = useState('friends');
@@ -139,8 +142,11 @@ const FriendsPage = () => {
     isLoading?: boolean;
     subtitle?: string;
   }) => (
-    <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 hover:shadow-md transition-shadow">
-      <div className="flex items-center justify-between">
+    <Card className="hover:shadow-md transition-shadow">
+      <CardHeader className="pb-0">
+        <CardTitle className="font-semibold text-gray-900">{user.username}</CardTitle>
+      </CardHeader>
+      <CardContent className="p-4 pt-2">
         <div className="flex items-center space-x-3">
           <Image
             src={user.profile_picture_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.username}`}
@@ -154,26 +160,26 @@ const FriendsPage = () => {
             }}
           />
           <div>
-            <h3 className="font-semibold text-gray-900">{user.username}</h3>
             <p className="text-sm text-gray-500">{user.email}</p>
             {subtitle && (
               <p className="text-xs text-gray-400">{subtitle}</p>
             )}
           </div>
         </div>
-        {action && ActionIcon && (
-          <button
+      </CardContent>
+      {action && ActionIcon && (
+        <CardFooter className="flex justify-end">
+          <Button
             onClick={() => action(user)}
             disabled={isLoading}
-            className={`inline-flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
-              actionVariant === 'danger'
-                ? 'text-red-700 bg-red-50 hover:bg-red-100 disabled:hover:bg-red-50'
-                : actionVariant === 'success'
-                ? 'text-green-700 bg-green-50 hover:bg-green-100 disabled:hover:bg-green-50'
-                : actionVariant === 'secondary'
-                ? 'text-gray-700 bg-gray-50 hover:bg-gray-100 disabled:hover:bg-gray-50'
-                : 'text-blue-700 bg-blue-50 hover:bg-blue-100 disabled:hover:bg-blue-50'
-            }`}
+            variant={
+              actionVariant === 'danger' ? 'destructive' :
+              actionVariant === 'success' ? 'secondary' :
+              actionVariant === 'secondary' ? 'secondary' :
+              'default'
+            }
+            size="sm"
+            className="inline-flex items-center"
           >
             {isLoading ? (
               <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current mr-1"></div>
@@ -181,10 +187,10 @@ const FriendsPage = () => {
               <ActionIcon className="w-4 h-4 mr-1" />
             )}
             {actionLabel}
-          </button>
-        )}
-      </div>
-    </div>
+          </Button>
+        </CardFooter>
+      )}
+    </Card>
   );
 
   const RequestCard = ({ request }: { request: PendingRequestResponse }) => {
@@ -195,8 +201,11 @@ const FriendsPage = () => {
     };
 
     return (
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-        <div className="flex items-center justify-between">
+      <Card className="hover:shadow-md transition-shadow">
+        <CardHeader className="pb-0">
+          <CardTitle className="font-semibold text-gray-900">{senderUser.username}</CardTitle>
+        </CardHeader>
+        <CardContent className="p-4 pt-2">
           <div className="flex items-center space-x-3">
             <Image
               src={senderUser.profile_picture_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${senderUser.username}`}
@@ -210,18 +219,21 @@ const FriendsPage = () => {
               }}
             />
             <div>
-              <h3 className="font-semibold text-gray-900">{senderUser.username}</h3>
               <p className="text-sm text-gray-500">{senderUser.email}</p>
               <p className="text-xs text-gray-400">
                 {request.created_at ? formatDate(request.created_at) : 'Unknown date'}
               </p>
             </div>
           </div>
+        </CardContent>
+        <CardFooter className="flex justify-end">
           <div className="flex space-x-2">
-            <button
+            <Button
               onClick={() => handleAcceptRequest(request.id)}
               disabled={acceptMutation.isPending}
-              className="inline-flex items-center px-3 py-2 text-sm font-medium text-green-700 bg-green-50 rounded-md hover:bg-green-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              variant="secondary"
+              size="sm"
+              className="inline-flex items-center text-green-700 bg-green-50 hover:bg-green-100"
             >
               {acceptMutation.isPending ? (
                 <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-green-700 mr-1"></div>
@@ -229,11 +241,13 @@ const FriendsPage = () => {
                 <Check className="w-4 h-4 mr-1" />
               )}
               Accept
-            </button>
-            <button
+            </Button>
+            <Button
               onClick={() => handleDeclineRequest(request.id)}
               disabled={declineMutation.isPending}
-              className="inline-flex items-center px-3 py-2 text-sm font-medium text-red-700 bg-red-50 rounded-md hover:bg-red-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              variant="destructive"
+              size="sm"
+              className="inline-flex items-center"
             >
               {declineMutation.isPending ? (
                 <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-red-700 mr-1"></div>
@@ -241,10 +255,10 @@ const FriendsPage = () => {
                 <X className="w-4 h-4 mr-1" />
               )}
               Decline
-            </button>
-          </div>  
-        </div>
-      </div>
+            </Button>
+          </div>
+        </CardFooter>
+      </Card>
     );
   };
 
@@ -256,8 +270,11 @@ const FriendsPage = () => {
     };
 
     return (
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-        <div className="flex items-center justify-between">
+      <Card className="hover:shadow-md transition-shadow">
+        <CardHeader className="pb-0">
+          <CardTitle className="font-semibold text-gray-900">{receiverUser.username}</CardTitle>
+        </CardHeader>
+        <CardContent className="p-4 pt-2">
           <div className="flex items-center space-x-3">
             <Image
               src={receiverUser.profile_picture_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${receiverUser.username}`}
@@ -271,7 +288,6 @@ const FriendsPage = () => {
               }}
             />
             <div>
-              <h3 className="font-semibold text-gray-900">{receiverUser.username}</h3>
               <p className="text-sm text-gray-500">{receiverUser.email}</p>
               <p className="text-xs text-gray-400 flex items-center">
                 <Clock className="w-3 h-3 mr-1" />
@@ -279,13 +295,13 @@ const FriendsPage = () => {
               </p>
             </div>
           </div>
-          <div className="flex items-center">
-            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-              Pending
-            </span>
-          </div>
-        </div>
-      </div>
+        </CardContent>
+        <CardFooter className="flex justify-end">
+          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+            Pending
+          </span>
+        </CardFooter>
+      </Card>
     );
   };
 
@@ -312,175 +328,172 @@ const FriendsPage = () => {
         </div>
 
         <div className="border-b border-gray-200">
-          <nav className="flex space-x-8 px-6">
-            {[
-              { id: 'friends', label: 'My Friends', icon: Users },
-              { id: 'requests', label: 'Friend Requests', icon: Bell, badge: pendingRequests.length },
-              { id: 'sent', label: 'Sent Requests', icon: Clock, badge: sentRequests.length },
-              { id: 'search', label: 'Find Friends', icon: Search }
-            ].map(tab => {
-              const Icon = tab.icon;
-              return (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
-                  className={`flex items-center py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
-                    activeTab === tab.id
-                      ? 'border-blue-500 text-blue-600'
-                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                  }`}
-                >
-                  <Icon className="w-5 h-5 mr-2" />
-                  {tab.label}
-                  {tab.badge && tab.badge > 0 && (
-                    <span className="ml-2 bg-red-500 text-white text-xs rounded-full px-2 py-1">
-                      {tab.badge}
-                    </span>
-                  )}
-                </button>
-              );
-            })}
-          </nav>
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="px-6">
+            <TabsList className="flex space-x-8 border-b border-gray-200 bg-transparent p-0">
+              <TabsTrigger value="friends" className="flex items-center py-4 px-1 border-b-2 font-medium text-sm">
+                <Users className="w-5 h-5 mr-2" />
+                My Friends
+              </TabsTrigger>
+              <TabsTrigger value="requests" className="flex items-center py-4 px-1 border-b-2 font-medium text-sm">
+                <Bell className="w-5 h-5 mr-2" />
+                Friend Requests
+                {pendingRequests.length > 0 && (
+                  <span className="ml-2 bg-red-500 text-white text-xs rounded-full px-2 py-1">{pendingRequests.length}</span>
+                )}
+              </TabsTrigger>
+              <TabsTrigger value="sent" className="flex items-center py-4 px-1 border-b-2 font-medium text-sm">
+                <Clock className="w-5 h-5 mr-2" />
+                Sent Requests
+                {sentRequests.length > 0 && (
+                  <span className="ml-2 bg-red-500 text-white text-xs rounded-full px-2 py-1">{sentRequests.length}</span>
+                )}
+              </TabsTrigger>
+              <TabsTrigger value="search" className="flex items-center py-4 px-1 border-b-2 font-medium text-sm">
+                <Search className="w-5 h-5 mr-2" />
+                Find Friends
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
         </div>
 
         <div className="p-6">
-          {activeTab === 'friends' && (
-            <div>
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-semibold text-gray-900">
-                  Your Friends ({friends.length})
-                </h2>
+          <Tabs value={activeTab} onValueChange={setActiveTab}>
+            <TabsContent value="friends">
+              <div>
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-xl font-semibold text-gray-900">
+                    Your Friends ({friends.length})
+                  </h2>
+                </div>
+                
+                {loadingFriends ? (
+                  <div className="text-center py-8">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+                    <p className="text-gray-500 mt-2">Loading friends...</p>
+                  </div>
+                ) : friendsError ? (
+                  <div className="text-center py-8">
+                    <div className="text-red-500 mb-2">Failed to load friends</div>
+                    <button 
+                      onClick={() => queryClient.invalidateQueries({ queryKey: ["friends"] })}
+                      className="text-blue-600 hover:text-blue-800"
+                    >
+                      Try again
+                    </button>
+                  </div>
+                ) : friends.length === 0 ? (
+                  <div className="text-center py-12">
+                    <Users className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                    <h3 className="text-lg font-medium text-gray-900 mb-2">No friends yet</h3>
+                    <p className="text-gray-500 mb-4">Start by searching for people to connect with</p>
+                    <button
+                      onClick={() => setActiveTab('search')}
+                      className="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 transition-colors"
+                    >
+                      <Search className="w-4 h-4 mr-2" />
+                      Find Friends
+                    </button>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {friends.map(friend => {
+                      const friendUser = getFriendUser(friend);
+                      return (
+                        <UserCard
+                          key={friendUser.id}
+                          user={friendUser}
+                          action={(user) => handleRemoveFriend(user.id, user.username || '')}
+                          actionLabel="Remove"
+                          actionIcon={Trash2}
+                          actionVariant="danger"
+                          isLoading={removeMutation.isPending}
+                        />
+                      );
+                    })}
+                  </div>
+                )}
               </div>
-              
-              {loadingFriends ? (
-                <div className="text-center py-8">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-                  <p className="text-gray-500 mt-2">Loading friends...</p>
-                </div>
-              ) : friendsError ? (
-                <div className="text-center py-8">
-                  <div className="text-red-500 mb-2">Failed to load friends</div>
-                  <button 
-                    onClick={() => queryClient.invalidateQueries({ queryKey: ["friends"] })}
-                    className="text-blue-600 hover:text-blue-800"
-                  >
-                    Try again
-                  </button>
-                </div>
-              ) : friends.length === 0 ? (
-                <div className="text-center py-12">
-                  <Users className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">No friends yet</h3>
-                  <p className="text-gray-500 mb-4">Start by searching for people to connect with</p>
-                  <button
-                    onClick={() => setActiveTab('search')}
-                    className="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 transition-colors"
-                  >
-                    <Search className="w-4 h-4 mr-2" />
-                    Find Friends
-                  </button>
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  {friends.map(friend => {
-                    const friendUser = getFriendUser(friend);
-                    return (
-                      <UserCard
-                        key={friendUser.id}
-                        user={friendUser}
-                        action={(user) => handleRemoveFriend(user.id, user.username || '')}
-                        actionLabel="Remove"
-                        actionIcon={Trash2}
-                        actionVariant="danger"
-                        isLoading={removeMutation.isPending}
-                      />
-                    );
-                  })}
-                </div>
-              )}
-            </div>
-          )}
+            </TabsContent>
 
-          {activeTab === 'requests' && (
-            <div>
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-semibold text-gray-900">
-                  Friend Requests ({pendingRequests.length})
-                </h2>
+            <TabsContent value="requests">
+              <div>
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-xl font-semibold text-gray-900">
+                    Friend Requests ({pendingRequests.length})
+                  </h2>
+                </div>
+                
+                {loadingRequests ? (
+                  <div className="text-center py-8">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+                    <p className="text-gray-500 mt-2">Loading requests...</p>
+                  </div>
+                ) : requestsError ? (
+                  <div className="text-center py-8">
+                    <div className="text-red-500 mb-2">Failed to load requests</div>
+                    <button 
+                      onClick={() => queryClient.invalidateQueries({ queryKey: ["pendingRequests"] })}
+                      className="text-blue-600 hover:text-blue-800"
+                    >
+                      Try again
+                    </button>
+                  </div>
+                ) : pendingRequests.length === 0 ? (
+                  <div className="text-center py-12">
+                    <Bell className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                    <h3 className="text-lg font-medium text-gray-900 mb-2">No pending requests</h3>
+                    <p className="text-gray-500">You&apos;re all caught up!</p>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {pendingRequests.map((request: PendingRequestResponse) => (
+                      <RequestCard key={request.id} request={request} />
+                    ))}
+                  </div>
+                )}
               </div>
-              
-              {loadingRequests ? (
-                <div className="text-center py-8">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-                  <p className="text-gray-500 mt-2">Loading requests...</p>
-                </div>
-              ) : requestsError ? (
-                <div className="text-center py-8">
-                  <div className="text-red-500 mb-2">Failed to load requests</div>
-                  <button 
-                    onClick={() => queryClient.invalidateQueries({ queryKey: ["pendingRequests"] })}
-                    className="text-blue-600 hover:text-blue-800"
-                  >
-                    Try again
-                  </button>
-                </div>
-              ) : pendingRequests.length === 0 ? (
-                <div className="text-center py-12">
-                  <Bell className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">No pending requests</h3>
-                  <p className="text-gray-500">You&apos;re all caught up!</p>
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  {pendingRequests.map((request: PendingRequestResponse) => (
-                    <RequestCard key={request.id} request={request} />
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
+            </TabsContent>
 
-          {activeTab === 'sent' && (
-            <div>
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-semibold text-gray-900">
-                  Sent Requests ({sentRequests.length})
-                </h2>
+            <TabsContent value="sent">
+              <div>
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-xl font-semibold text-gray-900">
+                    Sent Requests ({sentRequests.length})
+                  </h2>
+                </div>
+                
+                {loadingSentRequests ? (
+                  <div className="text-center py-8">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+                    <p className="text-gray-500 mt-2">Loading sent requests...</p>
+                  </div>
+                ) : sentRequestsError ? (
+                  <div className="text-center py-8">
+                    <div className="text-red-500 mb-2">Failed to load sent requests</div>
+                    <button 
+                      onClick={() => queryClient.invalidateQueries({ queryKey: ["sentRequests"] })}
+                      className="text-blue-600 hover:text-blue-800"
+                    >
+                      Try again
+                    </button>
+                  </div>
+                ) : sentRequests.length === 0 ? (
+                  <div className="text-center py-12">
+                    <Clock className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                    <h3 className="text-lg font-medium text-gray-900 mb-2">No sent requests</h3>
+                    <p className="text-gray-500">You haven&apos;t sent any friend requests yet</p>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {sentRequests.map((request: PendingRequestResponse) => (
+                      <SentRequestCard key={request.id} request={request} />
+                    ))}
+                  </div>
+                )}
               </div>
-              
-              {loadingSentRequests ? (
-                <div className="text-center py-8">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-                  <p className="text-gray-500 mt-2">Loading sent requests...</p>
-                </div>
-              ) : sentRequestsError ? (
-                <div className="text-center py-8">
-                  <div className="text-red-500 mb-2">Failed to load sent requests</div>
-                  <button 
-                    onClick={() => queryClient.invalidateQueries({ queryKey: ["sentRequests"] })}
-                    className="text-blue-600 hover:text-blue-800"
-                  >
-                    Try again
-                  </button>
-                </div>
-              ) : sentRequests.length === 0 ? (
-                <div className="text-center py-12">
-                  <Clock className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">No sent requests</h3>
-                  <p className="text-gray-500">You haven&apos;t sent any friend requests yet</p>
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  {sentRequests.map((request: PendingRequestResponse) => (
-                    <SentRequestCard key={request.id} request={request} />
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
+            </TabsContent>
 
-          {activeTab === 'search' && (
-            <div>
+            <TabsContent value="search">
               <div className="mb-6">
                 <h2 className="text-xl font-semibold text-gray-900 mb-4">Find Friends</h2>
                 <div className="relative">
@@ -530,8 +543,8 @@ const FriendsPage = () => {
                   ))}
                 </div>
               )}
-            </div>
-          )}
+            </TabsContent>
+          </Tabs>
         </div>
       </div>
     </div>

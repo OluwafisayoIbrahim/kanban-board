@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useNotificationStore } from "@/store/notification-store";
 import { Notification } from "@/types/index";
 import { formatNotificationTime } from '@/lib/utils';
+import { Button } from "@/components/ui/button";
 
 const getPriorityColor = (priority: Notification["priority"]): string => {
   switch (priority) {
@@ -119,18 +120,12 @@ export const Notifications: FC = () => {
   return (
     <div className="hidden md:flex items-center space-x-20 mx-4 relative">
       <div className="relative">
-        <button
+        <Button
           onClick={toggleNotificationPanel}
-          className={`p-2 rounded-lg transition-colors ${
-            settings.enabled
-              ? "hover:bg-gray-800 text-white cursor-pointer"
-              : "hover:bg-gray-100 text-gray-400 cursor-pointer"
-          }`}
-          title={
-            settings.enabled
-              ? "View notifications"
-              : "Notifications disabled"
-          }
+          variant="ghost"
+          size="icon"
+          className={`p-2 rounded-lg transition-colors ${settings.enabled ? "hover:bg-gray-400 text-white cursor-pointer" : "hover:bg-gray-100 text-gray-400 cursor-pointer"}`}
+          title={settings.enabled ? "View notifications" : "Notifications disabled"}
         >
           {settings.enabled ? (
             <Bell className="w-6 h-6" />
@@ -142,7 +137,7 @@ export const Notifications: FC = () => {
               {unreadCount}
             </span>
           )}
-        </button>
+        </Button>
         {showNotifications && settings.enabled && (
           <>
             <div
@@ -152,12 +147,14 @@ export const Notifications: FC = () => {
             <div className="absolute right-0 top-12 w-80 bg-white rounded-lg shadow-xl border border-gray-200 z-50">
               <div className="p-4 border-b border-gray-100 flex items-center justify-between">
                 <h3 className="font-semibold text-gray-900">Notifications</h3>
-                <button
+                <Button
                   onClick={() => setShowNotifications(false)}
+                  variant="ghost"
+                  size="icon"
                   className="p-1 hover:bg-gray-100 rounded"
                 >
                   <X className="w-4 h-4 text-gray-500" />
-                </button>
+                </Button>
               </div>
               <div className="max-h-96 overflow-y-auto">
                 {isLoading ? (
@@ -199,9 +196,11 @@ export const Notifications: FC = () => {
                                 : "bg-green-500"
                             }`}
                           />
-                          <button
+                          <Button
                             onClick={(e) => handleRemoveNotification(e, notification.id)}
                             disabled={deletingNotificationId === notification.id}
+                            variant="ghost"
+                            size="icon"
                             className="p-1 hover:bg-gray-200 rounded opacity-0 group-hover:opacity-100 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
                           >
                             {deletingNotificationId === notification.id ? (
@@ -209,7 +208,7 @@ export const Notifications: FC = () => {
                             ) : (
                               <X className="w-3 h-3 text-gray-400" />
                             )}
-                          </button>
+                          </Button>
                         </div>
                       </div>
                     </div>
@@ -223,12 +222,14 @@ export const Notifications: FC = () => {
               </div>
               {notifications.length > 0 && (
                 <div className="p-3 border-t border-gray-100">
-                  <button 
+                  <Button 
                     onClick={handleMarkAllAsRead}
+                    variant="link"
+                    size="sm"
                     className="w-full text-center text-sm text-purple-600 hover:text-purple-700 font-medium"
                   >
                     Mark all as read
-                  </button>
+                  </Button>
                 </div>
               )}
             </div>

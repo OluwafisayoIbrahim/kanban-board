@@ -9,6 +9,8 @@ import {
 } from '@/app/api/friends';
 import { User, FriendRequestCreate } from '@/types';
 import { useNotificationStore } from '@/store/notification-store';
+import { AlertDialog, AlertDialogTrigger, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction } from "@/components/ui/alert-dialog";
+import { useState } from "react";
 
 export const useFriendRequestActions = () => {
   const queryClient = useQueryClient();
@@ -91,9 +93,16 @@ export const useFriendRequestActions = () => {
   };
 
   const removeFriendAction = (friendId: string, friendName: string) => {
-    if (window.confirm(`Are you sure you want to remove ${friendName} from your friends?`)) {
-      removeMutation.mutate(friendId);
+    setDialogState({ open: true, friendId, friendName });
+  };
+
+  // Dialog state and handler
+  const [dialogState, setDialogState] = useState<{ open: boolean; friendId: string | null; friendName: string | null }>({ open: false, friendId: null, friendName: null });
+  const handleConfirmRemove = () => {
+    if (dialogState.friendId) {
+      removeMutation.mutate(dialogState.friendId);
     }
+    setDialogState({ open: false, friendId: null, friendName: null });
   };
 
   return {
@@ -104,6 +113,25 @@ export const useFriendRequestActions = () => {
     sendRequestMutation,
     acceptMutation,
     declineMutation,
-    removeMutation
+    removeMutation,
+    RemoveFriendDialog: (
+      <AlertDialog open={dialogState.open} onOpenChange={open => setDialogState(s => ({ ...s, open }))}>
+        <AlertDialogTrigger asChild>
+          <span /> {/* Placeholder: actual trigger button should be passed in UI */}
+        </AlertDialogTrigger>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Remove Friend</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to remove {dialogState.friendName} from your friends?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleConfirmRemove}>Remove</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    )
   };
 };

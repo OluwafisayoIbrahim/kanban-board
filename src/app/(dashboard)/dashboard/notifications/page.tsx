@@ -7,6 +7,9 @@ import { Notification } from '@/types';
 import { formatNotificationTime } from '@/lib/utils';
 import { toast } from 'sonner';
 import { clearAllUserNotifications } from '@/app/api/notifications';
+import { AlertDialog, AlertDialogTrigger, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction } from "@/components/ui/alert-dialog";
+import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from '@/components/ui/select';
+import { Button } from '@/components/ui/button';
 
 const getPriorityColor = (priority: Notification["priority"]): string => {
   switch (priority) {
@@ -53,6 +56,7 @@ const NotificationsPage = () => {
   const [filter, setFilter] = useState<'all' | 'unread' | 'read'>('all');
   const [typeFilter, setTypeFilter] = useState<Notification['type'] | 'all'>('all');
   const [timestampUpdate, setTimestampUpdate] = useState(0); 
+  const [clearDialogOpen, setClearDialogOpen] = useState(false);
   
   const {
     notifications,
@@ -99,16 +103,18 @@ const NotificationsPage = () => {
   };
 
   const handleClearAll = async () => {
-    if (window.confirm('Are you sure you want to clear all notifications? This will remove all old notifications with incorrect timestamps.')) {
-      try {
-        await clearAllUserNotifications();
-        toast.success('All notifications cleared');
-        fetchNotifications();
-        fetchUnreadCount();
-      } catch {
-        toast.error('Failed to clear notifications');
-      }
+    setClearDialogOpen(true);
+  };
+  const handleConfirmClearAll = async () => {
+    try {
+      await clearAllUserNotifications();
+      toast.success('All notifications cleared');
+      fetchNotifications();
+      fetchUnreadCount();
+    } catch {
+      toast.error('Failed to clear notifications');
     }
+    setClearDialogOpen(false);
   };
 
   const handleRefresh = async () => {
@@ -156,6 +162,14 @@ const NotificationsPage = () => {
     { value: 'task_completed', label: 'Task Completed', icon: Check },
   ];
 
+  // Add handlers for Select value changes
+  const handleFilterChange = (value: string) => {
+    setFilter(value as 'all' | 'unread' | 'read');
+  };
+  const handleTypeFilterChange = (value: string) => {
+    setTypeFilter(value as Notification['type'] | 'all');
+  };
+
   return (
     <div className="max-w-4xl mx-auto p-6 bg-gray-50 min-h-screen">
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
@@ -197,12 +211,29 @@ const NotificationsPage = () => {
               >
                 Refresh
               </button>
-              <button
-                onClick={handleClearAll}
-                className="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-md hover:bg-red-700 transition-colors"
-              >
-                Clear All
-              </button>
+              <AlertDialog open={clearDialogOpen} onOpenChange={setClearDialogOpen}>
+                <AlertDialogTrigger asChild>
+                  <Button
+                    variant="destructive"
+                    onClick={handleClearAll}
+                    className="ml-4"
+                  >
+                    Clear All
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Clear All Notifications</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      Are you sure you want to clear all notifications? This will remove all old notifications with incorrect timestamps.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction onClick={handleConfirmClearAll}>Clear All</AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
               <button
                 onClick={handleTestNotification}
                 className="px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-md hover:bg-green-700 transition-colors"
@@ -230,27 +261,28 @@ const NotificationsPage = () => {
           <div className="mb-6 space-y-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-4">
-                <select
-                  value={filter}
-                  onChange={(e) => setFilter(e.target.value as 'all' | 'unread' | 'read')}
-                  className="px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                >
-                  <option value="all">All Notifications</option>
-                  <option value="unread">Unread Only</option>
-                  <option value="read">Read Only</option>
-                </select>
-                
-                <select
-                  value={typeFilter}
-                  onChange={(e) => setTypeFilter(e.target.value as Notification['type'] | 'all')}
-                  className="px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                >
-                  {notificationTypes.map(type => (
-                    <option key={type.value} value={type.value}>
-                      {type.label}
-                    </option>
-                  ))}
-                </select>
+                <Select value={filter} onValueChange={handleFilterChange}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="All Notifications" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Notifications</SelectItem>
+                    <SelectItem value="unread">Unread Only</SelectItem>
+                    <SelectItem value="read">Read Only</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Select value={typeFilter} onValueChange={handleTypeFilterChange}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="All Types" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {notificationTypes.map(type => (
+                      <SelectItem key={type.value} value={type.value}>
+                        {type.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
               
               <div className="flex items-center space-x-2">
@@ -290,7 +322,7 @@ const NotificationsPage = () => {
                   onClick={() => handleNotificationClick(notification)}
                 >
                   <div className="flex items-start space-x-4">
-                    <div className={`mt-1 ${getPriorityColor(notification.priority)}`}>
+                    <div className={getPriorityColor(notification.priority)}>
                       {getNotificationIcon(notification.type)}
                     </div>
                     <div className="flex-1 min-w-0">
@@ -347,4 +379,4 @@ const NotificationsPage = () => {
   );
 };
 
-export default NotificationsPage; 
+export default NotificationsPage;
