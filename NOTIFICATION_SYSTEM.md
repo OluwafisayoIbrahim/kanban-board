@@ -20,7 +20,7 @@ The notification system uses a backend-based approach for better reliability, co
 5. **`formatNotificationTime`** - Centralized utility for timestamp formatting
 
 ### Notification Types
-- `friend_request` - Friend request notifications
+- `friend_request` - Friend request(s) notifications
 - `friend_accept` - Friend request accepted notifications
 - `friend_decline` - Friend request declined notifications
 - `deadline` - Task deadline notifications
