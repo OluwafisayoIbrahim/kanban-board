@@ -1,7 +1,7 @@
 # Notification System Documentation
 
 ## Overview
-The notification system is designed to ensure users reliably receive updates about relevant events. It leverages a backend-based approach, meaning all notifications are created, stored, and managed on the server rather than locally in the browser. This centralization increases reliability—notifications persist even if a user changes devices or browsers—and supports system scalability as more users or types of notifications are added.
+The notification system is designed to ensure users reliably receive updates about relevant events. It leverages a backend-based approach, meaning all notifications are created, stored, and managed on the server rather than locally in the browser(s). This centralization increases reliability—notifications persist even if a user changes devices or browsers—and supports system scalability as more users or types of notifications are added.
 
 ## Architecture
 
