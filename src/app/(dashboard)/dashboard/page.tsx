@@ -97,7 +97,6 @@ export default function DashboardPage(): JSX.Element {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  // Add these handlers for Select value changes
   const handleAssigneeChange = (value: string) => {
     setFormData(prev => ({ ...prev, assignee_id: value }));
   };
@@ -105,7 +104,6 @@ export default function DashboardPage(): JSX.Element {
     setFormData(prev => ({ ...prev, priority: value as 'Normal' | 'Warning' | 'Urgent' }));
   };
 
-  // Add handler for due date
   const handleDueDateChange = (date: Date | undefined) => {
     setFormData(prev => ({ ...prev, due_date: date ? date.toISOString() : '' }));
   };
@@ -194,9 +192,9 @@ export default function DashboardPage(): JSX.Element {
           </div>
         )}
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
+          <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto bg-white">
             <DialogHeader>
-              <DialogTitle className="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent flex items-center gap-2">
+              <DialogTitle className="text-2xl font-bold text-black flex items-center gap-2">
                 <Plus className="w-6 h-6" />
                 Create New Task
               </DialogTitle>
@@ -204,7 +202,7 @@ export default function DashboardPage(): JSX.Element {
             <div className="space-y-6 mt-6">
               <div className="grid grid-cols-1 gap-6">
                 <div className="space-y-2">
-                  <Label htmlFor="title" className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+                  <Label htmlFor="title" className="text-sm font-semibold text-black flex items-center gap-2">
                     <FileText className="w-4 h-4" />
                     Task Title *
                   </Label>
@@ -214,12 +212,12 @@ export default function DashboardPage(): JSX.Element {
                     name="title"
                     value={formData.title}
                     onChange={handleInputChange}
-                    className="w-full"
+                    className="w-full border-gray-300"
                     placeholder="Enter task title..."
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="description" className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+                  <Label htmlFor="description" className="text-sm font-semibold text-black flex items-center gap-2">
                     <FileText className="w-4 h-4" />
                     Description
                   </Label>
@@ -230,16 +228,17 @@ export default function DashboardPage(): JSX.Element {
                     onChange={handleInputChange}
                     rows={4}
                     placeholder="Describe the task in detail..."
+                    className="border-gray-300"
                   />
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="assignee" className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+                    <Label htmlFor="assignee" className="text-sm font-semibold text-black flex items-center gap-2">
                       <User className="w-4 h-4" />
                       Assignee (Optional)
                     </Label>
                     <Select value={formData.assignee_id} onValueChange={handleAssigneeChange}>
-                      <SelectTrigger id="assignee" name="assignee_id">
+                      <SelectTrigger id="assignee" name="assignee_id" className="border-gray-300">
                         <SelectValue placeholder="Select a friend..." />
                       </SelectTrigger>
                       <SelectContent>
@@ -256,7 +255,7 @@ export default function DashboardPage(): JSX.Element {
                     </Select>
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="due_date" className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+                    <Label htmlFor="due_date" className="text-sm font-semibold text-black flex items-center gap-2">
                       <CalendarIcon className="w-4 h-4" />
                       Due Date
                     </Label>
@@ -265,7 +264,7 @@ export default function DashboardPage(): JSX.Element {
                         <Button
                           variant="outline"
                           className={cn(
-                            "w-full justify-start text-left font-normal",
+                            "w-full justify-start text-left font-normal border-gray-300",
                             !formData.due_date && "text-muted-foreground"
                           )}
                         >
@@ -287,12 +286,12 @@ export default function DashboardPage(): JSX.Element {
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="priority" className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+                    <Label htmlFor="priority" className="text-sm font-semibold text-black flex items-center gap-2">
                       <AlertTriangle className="w-4 h-4" />
                       Priority
                     </Label>
                     <Select value={formData.priority} onValueChange={handlePriorityChange}>
-                      <SelectTrigger id="priority" name="priority">
+                      <SelectTrigger id="priority" name="priority" className="border-gray-300">
                         <SelectValue placeholder="Select priority" />
                       </SelectTrigger>
                       <SelectContent>
@@ -303,7 +302,7 @@ export default function DashboardPage(): JSX.Element {
                     </Select>
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="tags" className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+                    <Label htmlFor="tags" className="text-sm font-semibold text-black flex items-center gap-2">
                       <Tag className="w-4 h-4" />
                       Tags
                     </Label>
@@ -313,18 +312,18 @@ export default function DashboardPage(): JSX.Element {
                       name="tags"
                       value={formData.tags}
                       onChange={handleInputChange}
-                      className="w-full"
+                      className="w-full border-gray-300"
                       placeholder="UI, Design, Frontend (comma separated)"
                     />
                   </div>
                 </div>
               </div>
-              <div className="flex justify-end gap-3 pt-4 border-t">
+              <div className="flex justify-end gap-3 pt-4 border-t border-gray-200">
                 <Button
                   type="button"
                   variant="outline"
                   onClick={() => setIsDialogOpen(false)}
-                  className="flex items-center gap-2"
+                  className="flex items-center gap-2 border-gray-300 text-black hover:bg-gray-100"
                 >
                   <X className="w-4 h-4" />
                   Cancel
@@ -332,7 +331,7 @@ export default function DashboardPage(): JSX.Element {
                 <Button
                   onClick={handleSubmit}
                   disabled={isLoading}
-                  className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white flex items-center gap-2"
+                  className="bg-black hover:bg-gray-800 text-white flex items-center gap-2"
                 >
                   <Plus className="w-4 h-4" />
                   {isLoading ? 'Creating...' : 'Create Task'}
