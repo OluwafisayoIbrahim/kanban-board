@@ -1,11 +1,10 @@
 "use client";
 import React from 'react';
-import { Plus, Calendar, Tag, Clock, Sparkles, Trash2, ChevronDown, BarChart3, CheckCircle, AlertCircle, Target, Edit2, PencilIcon, Laptop, Plug, Rocket, Phone, Eye } from 'lucide-react';
+import { Plus, Tag, Sparkles, Trash2, Edit2, PencilIcon, Laptop, Plug, Rocket, Phone, Eye } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Task } from '@/types/index';
 import { KanbanBoardProps } from '@/types/index';
-import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from '@/components/ui/select';
-import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@/components/ui/card';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 
 const KanbanBoard = ({ tasks, onDeleteTask, onUpdateTask, onCreateTask }: KanbanBoardProps) => {
   const getPriorityColor = (priority: string) => {
@@ -19,15 +18,15 @@ const KanbanBoard = ({ tasks, onDeleteTask, onUpdateTask, onCreateTask }: Kanban
     }
   };
 
-  const getStatusColor = (status: string) => {
-    switch (status.toLowerCase()) {
-      case 'todo': return 'bg-slate-100 text-slate-700';
-      case 'in_progress': return 'bg-blue-100 text-blue-700';
-      case 'review': return 'bg-purple-100 text-purple-700';
-      case 'done': return 'bg-green-100 text-green-700';
-      default: return 'bg-gray-100 text-gray-700';
-    }
-  };
+  // const getStatusColor = (status: string) => {
+  //   switch (status.toLowerCase()) {
+  //     case 'todo': return 'bg-slate-100 text-slate-700';
+  //     case 'in_progress': return 'bg-blue-100 text-blue-700';
+  //     case 'review': return 'bg-purple-100 text-purple-700';
+  //     case 'done': return 'bg-green-100 text-green-700';
+  //     default: return 'bg-gray-100 text-gray-700';
+  //   }
+  // };
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
@@ -39,12 +38,14 @@ const KanbanBoard = ({ tasks, onDeleteTask, onUpdateTask, onCreateTask }: Kanban
 
   const getTaskIcon = (title: string, tags: string[]) => {
     const lowerTitle = title.toLowerCase();
-    if (lowerTitle.includes('design')) return <PencilIcon className="w-5 h-5" />;
-    if (lowerTitle.includes('ui')) return <Laptop className="w-5 h-5" />;
-    if (lowerTitle.includes('api')) return <Plug className="w-5 h-5" />;
-    if (lowerTitle.includes('ci/cd')) return <Rocket className="w-5 h-5" />;
-    if (lowerTitle.includes('mobile')) return <Phone className="w-5 h-5" />;
-    if (lowerTitle.includes('review')) return <Eye className="w-5 h-5" />;
+    const tagString = tags.join(' ').toLowerCase();
+    
+    if (lowerTitle.includes('design') || tagString.includes('design')) return <PencilIcon className="w-5 h-5" />;
+    if (lowerTitle.includes('ui') || tagString.includes('ui')) return <Laptop className="w-5 h-5" />;
+    if (lowerTitle.includes('api') || tagString.includes('api')) return <Plug className="w-5 h-5" />;
+    if (lowerTitle.includes('ci/cd') || tagString.includes('ci/cd')) return <Rocket className="w-5 h-5" />;
+    if (lowerTitle.includes('mobile') || tagString.includes('mobile')) return <Phone className="w-5 h-5" />;
+    if (lowerTitle.includes('review') || tagString.includes('review')) return <Eye className="w-5 h-5" />;
     return <Tag className="w-5 h-5" />;
   };
 
@@ -78,9 +79,9 @@ const KanbanBoard = ({ tasks, onDeleteTask, onUpdateTask, onCreateTask }: Kanban
     </div>
   );
 
-  const handleStatusChange = (taskId: string, value: string) => {
-    onUpdateTask?.(taskId, { status: value });
-  };
+  // const handleStatusChange = (taskId: string, value: string) => {
+  //   onUpdateTask?.(taskId, { status: value });
+  // };
 
   const TaskCard = ({ task, onDelete, onUpdate }: { 
     task: Task; 
