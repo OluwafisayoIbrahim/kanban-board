@@ -105,7 +105,7 @@ const ProfilePicture: FC = () => {
         onClick={handleProfileClick}
         className="flex items-center space-x-2 p-1 cursor-pointer rounded-full transition-colors focus:outline-none"
       >
-        <div className="w-[98px] h-[98px] rounded-xl overflow-hidden">
+        <div className="w-[50px] h-[50px] rounded-xl overflow-hidden">
           {profileData?.profile_picture_url ? (
             <Image
               src={profileData.profile_picture_url}

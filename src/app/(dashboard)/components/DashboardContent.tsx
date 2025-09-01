@@ -1,12 +1,10 @@
 "use client";
 import React from 'react';
-import { Plus, Calendar, Tag, Clock, Sparkles, Trash2, ChevronDown, BarChart3, CheckCircle, AlertCircle, Target } from 'lucide-react';
+import { Plus, Tag, Sparkles, Trash2, Edit2, PencilIcon, Laptop, Plug, Rocket, Phone, Eye } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Task } from '@/types/index';
 import { KanbanBoardProps } from '@/types/index';
-import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from '@/components/ui/select';
-import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@/components/ui/card';
-
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 
 const KanbanBoard = ({ tasks, onDeleteTask, onUpdateTask, onCreateTask }: KanbanBoardProps) => {
   const getPriorityColor = (priority: string) => {
@@ -20,37 +18,50 @@ const KanbanBoard = ({ tasks, onDeleteTask, onUpdateTask, onCreateTask }: Kanban
     }
   };
 
-  const getStatusColor = (status: string) => {
-    switch (status.toLowerCase()) {
-      case 'todo': return 'bg-slate-100 text-slate-700';
-      case 'in_progress': return 'bg-blue-100 text-blue-700';
-      case 'review': return 'bg-purple-100 text-purple-700';
-      case 'done': return 'bg-green-100 text-green-700';
-      default: return 'bg-gray-100 text-gray-700';
-    }
-  };
+  // const getStatusColor = (status: string) => {
+  //   switch (status.toLowerCase()) {
+  //     case 'todo': return 'bg-slate-100 text-slate-700';
+  //     case 'in_progress': return 'bg-blue-100 text-blue-700';
+  //     case 'review': return 'bg-purple-100 text-purple-700';
+  //     case 'done': return 'bg-green-100 text-green-700';
+  //     default: return 'bg-gray-100 text-gray-700';
+  //   }
+  // };
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
       month: 'short',
       day: 'numeric',
       year: 'numeric'
-    });
+    }).toUpperCase();
+  };
+
+  const getTaskIcon = (title: string, tags: string[]) => {
+    const lowerTitle = title.toLowerCase();
+    const tagString = tags.join(' ').toLowerCase();
+    
+    if (lowerTitle.includes('design') || tagString.includes('design')) return <PencilIcon className="w-5 h-5" />;
+    if (lowerTitle.includes('ui') || tagString.includes('ui')) return <Laptop className="w-5 h-5" />;
+    if (lowerTitle.includes('api') || tagString.includes('api')) return <Plug className="w-5 h-5" />;
+    if (lowerTitle.includes('ci/cd') || tagString.includes('ci/cd')) return <Rocket className="w-5 h-5" />;
+    if (lowerTitle.includes('mobile') || tagString.includes('mobile')) return <Phone className="w-5 h-5" />;
+    if (lowerTitle.includes('review') || tagString.includes('review')) return <Eye className="w-5 h-5" />;
+    return <Tag className="w-5 h-5" />;
   };
 
   const EmptyState = () => (
-    <div className="flex flex-col items-center justify-center min-h-[400px] text-center space-y-6 bg-gradient-to-br from-indigo-50 to-white rounded-2xl border border-indigo-100 p-12">
+    <div className="flex flex-col items-center justify-center min-h-[400px] text-center space-y-6 bg-white rounded-2xl border border-gray-200 p-12">
       <div className="relative">
-        <div className="w-24 h-24 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center shadow-lg">
+        <div className="w-24 h-24 bg-black rounded-full flex items-center justify-center shadow-lg">
           <Sparkles className="w-12 h-12 text-white" />
         </div>
-        <div className="absolute -top-2 -right-2 w-8 h-8 bg-yellow-400 rounded-full flex items-center justify-center shadow-md">
-          <Plus className="w-4 h-4 text-white" />
+        <div className="absolute -top-2 -right-2 w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center shadow-md">
+          <Plus className="w-4 h-4 text-black" />
         </div>
       </div>
       
       <div className="space-y-3">
-        <h2 className="text-2xl font-bold text-gray-900">Ready to get started?</h2>
+        <h2 className="text-2xl font-bold text-black">Ready to get started?</h2>
         <p className="text-gray-600 max-w-md mx-auto leading-relaxed">
           Create your first task and start organizing your workflow. Every great project begins with a single task!
         </p>
@@ -59,7 +70,7 @@ const KanbanBoard = ({ tasks, onDeleteTask, onUpdateTask, onCreateTask }: Kanban
       {onCreateTask && (
         <Button 
           onClick={onCreateTask}
-          className="group relative inline-flex items-center gap-3 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white px-8 py-4 rounded-xl font-semibold transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl"
+          className="group relative inline-flex items-center gap-3 bg-black hover:bg-gray-800 text-white px-8 py-4 rounded-xl font-semibold transition-all duration-300 shadow-lg hover:shadow-xl"
         >
           <Plus className="w-5 h-5" />
           Create Task
@@ -68,161 +79,91 @@ const KanbanBoard = ({ tasks, onDeleteTask, onUpdateTask, onCreateTask }: Kanban
     </div>
   );
 
-  const handleStatusChange = (taskId: string, value: string) => {
-    onUpdateTask?.(taskId, { status: value });
-  };
+  // const handleStatusChange = (taskId: string, value: string) => {
+  //   onUpdateTask?.(taskId, { status: value });
+  // };
 
   const TaskCard = ({ task, onDelete, onUpdate }: { 
     task: Task; 
     onDelete?: (taskId: string) => void;
     onUpdate?: (taskId: string, updates: { title?: string; description?: string; status?: string; priority?: 'Normal' | 'Warning' | 'Urgent'; due_date?: string; position?: number }) => void;
-  }) => (
-    <Card className="hover:shadow-lg transition-all duration-300 group">
-      <CardHeader className="pb-0 flex flex-row items-center justify-between">
-        <CardTitle className="font-semibold text-gray-900 group-hover:text-indigo-600 transition-colors duration-200 line-clamp-2">
-          {task.title}
-        </CardTitle>
-        {onUpdate && (
-          <Button
-            size="icon"
-            variant="ghost"
-            className="ml-2"
-            title="Edit title (demo)"
-            onClick={() => onUpdate(task.id, { title: task.title + ' (edited)' })}
-          >
-            <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M15.232 5.232l3.536 3.536M9 13l6.586-6.586a2 2 0 112.828 2.828L11.828 15.828a2 2 0 01-1.414.586H7v-3a2 2 0 01.586-1.414z"></path></svg>
-          </Button>
-        )}
-      </CardHeader>
-      <CardContent className="space-y-4 p-6 pt-2">
-        <div className="flex items-start justify-between">
-          <div />
-          <div className="flex items-center gap-2">
-          <span className={`px-2 py-1 rounded-full text-xs font-medium border ${getPriorityColor(task.priority)}`}>
-            {task.priority}
-          </span>
+  }) => {
+    const assignee = task.assignees && task.assignees.length > 0 ? task.assignees[0] : null;
+    const assigneeName = assignee ? (assignee.name || assignee.username || "Unknown") : "Unassigned";
+    const tag = Array.isArray(task.tags) && task.tags.length > 0 ? task.tags[0] : null;
+
+    return (
+      <Card className="hover:shadow-lg transition-all duration-300 group bg-white border-gray-200">
+        <CardHeader className="pb-2 flex flex-row items-center gap-2">
+          {getTaskIcon(task.title, task.tags || [])}
+          <CardTitle className="font-semibold text-black text-lg line-clamp-2">
+            {task.title}
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3 p-6 pt-0">
+          {task.description && (
+            <p className="text-gray-600 text-sm line-clamp-3">{task.description}</p>
+          )}
+
+          <div className="text-sm text-gray-600">
+            {task.due_date ? formatDate(task.due_date) : 'No due date'}
+          </div>
+
+          <div className="text-sm text-gray-600 flex items-center gap-2">
+            Assigned to: {assigneeName}
+            <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center text-black text-xs font-semibold">
+              {assigneeName.charAt(0).toUpperCase()}
+            </div>
+          </div>
+
+          <div className="flex items-center justify-between">
+            {tag && (
+              <span className="px-3 py-1 bg-green-100 text-green-800 rounded-full text-xs font-medium">
+                {tag}
+              </span>
+            )}
+            <span className={`px-3 py-1 rounded-full text-xs font-medium border ${getPriorityColor(task.priority)}`}>
+              {task.priority}
+            </span>
+          </div>
+
+          <div className="flex items-center justify-end gap-2 pt-2">
+            <Button variant="ghost" size="icon" className="text-gray-500 hover:text-black">
+              <Plus className="w-4 h-4" />
+            </Button>
+            <Button variant="ghost" size="icon" className="text-gray-500 hover:text-black" onClick={() => onUpdate?.(task.id, { title: task.title + ' (edited)' })}>
+              <Edit2 className="w-4 h-4" />
+            </Button>
             {onDelete && (
-              <Button
-                onClick={() => onDelete(task.id)}
-                variant="ghost"
-                size="sm"
-                className="opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-red-50 rounded text-red-500 hover:text-red-700"
-                title="Delete task"
-              >
+              <Button variant="ghost" size="icon" className="text-gray-500 hover:text-red-500" onClick={() => onDelete(task.id)}>
                 <Trash2 className="w-4 h-4" />
               </Button>
             )}
           </div>
+        </CardContent>
+      </Card>
+    );
+  };
+
+  return (
+    <div className="p-6 bg-white min-h-screen">
+      <div className="max-w-7xl mx-auto">
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-black">To Do</h1>
         </div>
 
-        {task.description && (
-          <p className="text-gray-600 text-sm line-clamp-3">{task.description}</p>
-        )}
-
-        {Array.isArray(task.tags) && task.tags.length > 0 && (
-          <div className="flex flex-wrap gap-2">
-            {task.tags.map((tag, index) => (
-              <span key={index} className="px-2 py-1 bg-indigo-50 text-indigo-700 rounded-md text-xs font-medium flex items-center gap-1">
-                <Tag className="w-3 h-3" />
-                {tag}
-              </span>
+        {tasks.length === 0 ? (
+          <EmptyState />
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {tasks.map(task => (
+              <TaskCard key={task.id} task={task} onDelete={onDeleteTask} onUpdate={onUpdateTask} />
             ))}
           </div>
         )}
-
-        <CardFooter className="flex items-center justify-between pt-4 border-t border-gray-100 p-0 mt-4">
-          <div className="flex items-center gap-2 text-sm text-gray-600">
-            <Calendar className="w-4 h-4" />
-            {task.due_date ? formatDate(task.due_date) : 'No due date'}
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="relative">
-              <Select value={task.status} onValueChange={(value: string) => handleStatusChange(task.id, value)}>
-                <SelectTrigger className={`px-3 py-1 rounded-full text-xs font-medium border-0 ${getStatusColor(task.status)} pr-8 cursor-pointer hover:opacity-80 transition-opacity`}>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="todo">To Do</SelectItem>
-                  <SelectItem value="in_progress">In Progress</SelectItem>
-                  <SelectItem value="review">Review</SelectItem>
-                  <SelectItem value="done">Done</SelectItem>
-                </SelectContent>
-              </Select>
-              <ChevronDown className="absolute right-2 top-1/2 transform -translate-y-1/2 w-3 h-3 text-gray-500 pointer-events-none" />
-            </div>
-            <div className="w-8 h-8 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center text-white text-xs font-semibold">
-              {task.assignees && task.assignees.length > 0 
-                ? (task.assignees[0]?.name || task.assignees[0]?.username || "?").charAt(0).toUpperCase()
-                : "?"}
-            </div>
-          </div>
-        </CardFooter>
-      </CardContent>
-    </Card>
-  );
-
-  return (
-    <>
-      <div className="p-6 bg-gray-50 min-h-screen">
-        <div className="max-w-7xl mx-auto">
-          <div className="flex items-center justify-between mb-8">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg flex items-center justify-center">
-                <BarChart3 className="w-6 h-6 text-white" />
-              </div>
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
-              <p className="text-gray-600 mt-1">
-                {tasks.length === 0 
-                  ? "Welcome! Start by creating your first task." 
-                  : `You have ${tasks.length} task${tasks.length !== 1 ? 's' : ''} to manage.`
-                }
-              </p>
-            </div>
-            </div>
-          </div>
-
-          {tasks.length > 0 && (
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-              {[
-                { label: 'Total Tasks', value: tasks.length, bgColor: 'bg-indigo-100', iconColor: 'text-indigo-600', icon: Target },
-                { label: 'In Progress', value: tasks.filter(t => t.status === 'in_progress').length, bgColor: 'bg-blue-100', iconColor: 'text-blue-600', icon: Clock },
-                { label: 'Completed', value: tasks.filter(t => t.status === 'done').length, bgColor: 'bg-green-100', iconColor: 'text-green-600', icon: CheckCircle },
-                { label: 'Urgent', value: tasks.filter(t => t.priority === 'urgent' || t.priority === 'high').length, bgColor: 'bg-red-100', iconColor: 'text-red-600', icon: AlertCircle }
-              ].map((stat, index) => {
-                const IconComponent = stat.icon;
-                return (
-                  <Card key={index} className="hover:shadow-md transition-shadow duration-200">
-                    <CardHeader>
-                      <CardTitle>{stat.label}</CardTitle>
-                    </CardHeader>
-                    <CardContent className="flex items-center justify-between p-6 pt-2">
-                      <div>
-                        <p className="text-3xl font-bold text-gray-900">{stat.value}</p>
-                      </div>
-                      <div className={`w-12 h-12 ${stat.bgColor} rounded-lg flex items-center justify-center`}>
-                        <IconComponent className={`w-6 h-6 ${stat.iconColor}`} />
-                      </div>
-                    </CardContent>
-                  </Card>
-                );
-              })}
-            </div>
-          )}
-
-          {tasks.length === 0 ? (
-            <EmptyState />
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {tasks.map(task => (
-                <TaskCard key={task.id} task={task} onDelete={onDeleteTask} onUpdate={onUpdateTask} />
-              ))}
-            </div>
-          )}
-        </div>
       </div>
-    </>
+    </div>
   );
 };
 
-export default KanbanBoard; 
+export default KanbanBoard;
